@@ -137,7 +137,7 @@ custom_fields:
   field_type: number
   name: Models per leaderboard
   description: Rows on the full layout (1 to 15).
-  help_text: Smaller layouts show 5 rows each and hide rows that do not fit.
+  help_text: The TRMNL OG fits 12 rows (11 with three leaderboards), the TRMNL X shows them all. The half and quadrant layouts show 5 rows on the OG and up to 8 on the X, and hide rows that do not fit.
   default: 10
   min: 1
   max: 15
@@ -161,7 +161,7 @@ custom_fields:
 - keyname: highlight
   field_type: string
   name: Highlight
-  description: Comma-separated words; models whose name contains one are shown inverted. Empty = none.
+  description: Comma-separated words, case-insensitive; models whose name contains one are shown white on black. Empty = none.
   optional: true
   placeholder: claude, mistral
 - keyname: title
