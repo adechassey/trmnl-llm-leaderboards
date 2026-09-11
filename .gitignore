@@ -1,0 +1,12 @@
+# trmnlp build output
+_build/
+
+# Optional Artificial Analysis key for local previews: keep it in .env (loaded by bin/dev).
+# .trmnlp.yml is committed by TRMNL's GitHub sync with empty custom fields; keep your
+# local values out of git with: git update-index --skip-worktree .trmnlp.yml
+.env
+
+# smoke test renders and screenshots
+/dev/.smoke/
+/dev/fixture/_build/
+__pycache__/

@@ -1,0 +1,26 @@
+# Local preview server config (trmnlp). Not uploaded to TRMNL.
+# Copied to ./.trmnlp.yml by bin/dev (git-ignored file: it may hold the Artificial Analysis key).
+---
+watch:
+  - .trmnlp.yml
+  - src
+
+# Time zone injected into trmnl.user (utc_offset, time_zone_iana)
+time_zone: Europe/Paris
+
+# Plugin field values (defined in src/settings.yml). The Artificial Analysis key can also be
+# given as AA_API_KEY in the environment or in .env: the function reads it when this is empty.
+custom_fields:
+  board_1: "arena_text"
+  board_2: "epoch_eci"
+  board_3: "none"
+  max_models: "10"
+  open_weights_only: "no"
+  highlight: ""
+  title: ""
+  aa_api_key: ""
+  livebench_version: ""
+  language: "auto"
+
+variables:
+  trmnl: {}

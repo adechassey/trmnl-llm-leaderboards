@@ -1,0 +1,189 @@
+---
+strategy: polling
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data: ''
+polling_verb: get
+framework_version: latest
+serverless_language: python
+polling_url: https://raw.githubusercontent.com/oolong-tea-2026/arena-ai-leaderboards/main/data/latest.json
+polling_headers: ''
+polling_body: ''
+oauth_enabled: 'false'
+oauth_pkce_enabled: 'no'
+oauth_authorize_url: ''
+oauth_token_url: ''
+oauth_scopes: ''
+oauth_scope_separator: ''
+oauth_refresh_url: ''
+oauth_auth_params: ''
+oauth_token_headers: ''
+oauth_token_site: ''
+oauth_token_params: ''
+oauth_token_request_auth_method: ''
+oauth_body_format: ''
+oauth_token_response_metadata: ''
+oauth_authorization_method: ''
+oauth_refresh_params: ''
+oauth_token_field_name: ''
+oauth_expiry_field_name: ''
+oauth_expiry_strategy: ''
+oauth_fixed_expiry_ms: ''
+custom_fields:
+- keyname: about
+  field_type: author_bio
+  name: About This Plugin
+  category: technology
+  description: Top models on the main LLM benchmark leaderboards, up to three side by side. Arena (LMArena) Elo, the Epoch Capabilities Index and Epoch AI's benchmark tables (GPQA Diamond, SWE-bench Verified, FrontierMath, Terminal-Bench, ARC-AGI-2...), LiveBench, and the Artificial Analysis indices with your free key. No server needed. Labels in English or French.
+  github_url: https://github.com/adechassey/trmnl-llm-leaderboards
+  learn_more_url: https://epoch.ai/benchmarks
+- keyname: board_1
+  field_type: select
+  name: Leaderboard 1
+  description: Shown on every layout.
+  options:
+  - Arena Text (Elo): arena_text
+  - Arena Code (Elo): arena_code
+  - Arena Vision (Elo): arena_vision
+  - Arena Search (Elo): arena_search
+  - Epoch Capabilities Index: epoch_eci
+  - GPQA Diamond (Epoch AI): epoch_gpqa
+  - "Humanity's Last Exam (Epoch AI)": epoch_hle
+  - SWE-bench Verified (Epoch AI): epoch_swebench
+  - Terminal-Bench (Epoch AI): epoch_terminalbench
+  - Aider Polyglot (Epoch AI): epoch_aider
+  - FrontierMath Tiers 1-3 (Epoch AI): epoch_frontiermath
+  - FrontierMath Tier 4 (Epoch AI): epoch_frontiermath_t4
+  - ARC-AGI-2 (Epoch AI): epoch_arcagi2
+  - SimpleQA Verified (Epoch AI): epoch_simpleqa
+  - OTIS Mock AIME (Epoch AI): epoch_aime
+  - OSWorld 2.0 (Epoch AI): epoch_osworld
+  - METR Time Horizon (Epoch AI): epoch_metr
+  - LiveBench: livebench
+  - LiveBench Reasoning: livebench_reasoning
+  - LiveBench Coding: livebench_coding
+  - LiveBench Agentic Coding: livebench_agentic
+  - LiveBench Mathematics: livebench_math
+  - Artificial Analysis Intelligence Index (API key): aa_intelligence
+  - Artificial Analysis Coding Index (API key): aa_coding
+  - Artificial Analysis Agentic Index (API key): aa_agentic
+  default: arena_text
+- keyname: board_2
+  field_type: select
+  name: Leaderboard 2
+  description: Shown next to the first one on the full and half layouts.
+  options:
+  - None: none
+  - Arena Text (Elo): arena_text
+  - Arena Code (Elo): arena_code
+  - Arena Vision (Elo): arena_vision
+  - Arena Search (Elo): arena_search
+  - Epoch Capabilities Index: epoch_eci
+  - GPQA Diamond (Epoch AI): epoch_gpqa
+  - "Humanity's Last Exam (Epoch AI)": epoch_hle
+  - SWE-bench Verified (Epoch AI): epoch_swebench
+  - Terminal-Bench (Epoch AI): epoch_terminalbench
+  - Aider Polyglot (Epoch AI): epoch_aider
+  - FrontierMath Tiers 1-3 (Epoch AI): epoch_frontiermath
+  - FrontierMath Tier 4 (Epoch AI): epoch_frontiermath_t4
+  - ARC-AGI-2 (Epoch AI): epoch_arcagi2
+  - SimpleQA Verified (Epoch AI): epoch_simpleqa
+  - OTIS Mock AIME (Epoch AI): epoch_aime
+  - OSWorld 2.0 (Epoch AI): epoch_osworld
+  - METR Time Horizon (Epoch AI): epoch_metr
+  - LiveBench: livebench
+  - LiveBench Reasoning: livebench_reasoning
+  - LiveBench Coding: livebench_coding
+  - LiveBench Agentic Coding: livebench_agentic
+  - LiveBench Mathematics: livebench_math
+  - Artificial Analysis Intelligence Index (API key): aa_intelligence
+  - Artificial Analysis Coding Index (API key): aa_coding
+  - Artificial Analysis Agentic Index (API key): aa_agentic
+  default: epoch_eci
+- keyname: board_3
+  field_type: select
+  name: Leaderboard 3
+  description: Full layout only, as a third column.
+  options:
+  - None: none
+  - Arena Text (Elo): arena_text
+  - Arena Code (Elo): arena_code
+  - Arena Vision (Elo): arena_vision
+  - Arena Search (Elo): arena_search
+  - Epoch Capabilities Index: epoch_eci
+  - GPQA Diamond (Epoch AI): epoch_gpqa
+  - "Humanity's Last Exam (Epoch AI)": epoch_hle
+  - SWE-bench Verified (Epoch AI): epoch_swebench
+  - Terminal-Bench (Epoch AI): epoch_terminalbench
+  - Aider Polyglot (Epoch AI): epoch_aider
+  - FrontierMath Tiers 1-3 (Epoch AI): epoch_frontiermath
+  - FrontierMath Tier 4 (Epoch AI): epoch_frontiermath_t4
+  - ARC-AGI-2 (Epoch AI): epoch_arcagi2
+  - SimpleQA Verified (Epoch AI): epoch_simpleqa
+  - OTIS Mock AIME (Epoch AI): epoch_aime
+  - OSWorld 2.0 (Epoch AI): epoch_osworld
+  - METR Time Horizon (Epoch AI): epoch_metr
+  - LiveBench: livebench
+  - LiveBench Reasoning: livebench_reasoning
+  - LiveBench Coding: livebench_coding
+  - LiveBench Agentic Coding: livebench_agentic
+  - LiveBench Mathematics: livebench_math
+  - Artificial Analysis Intelligence Index (API key): aa_intelligence
+  - Artificial Analysis Coding Index (API key): aa_coding
+  - Artificial Analysis Agentic Index (API key): aa_agentic
+  default: none
+- keyname: max_models
+  field_type: number
+  name: Models per leaderboard
+  description: Rows on the full layout (1 to 15).
+  help_text: Smaller layouts show 5 rows each and hide rows that do not fit.
+  default: 10
+  min: 1
+  max: 15
+  optional: true
+- keyname: open_weights_only
+  field_type: select
+  name: Open-weights models only
+  description: Keep only open-weights models where the source says which ones are (Arena and Epoch AI). Ranks stay those of the full leaderboard.
+  options:
+  - 'No': 'no'
+  - 'Yes': 'yes'
+  default: 'no'
+- keyname: highlight
+  field_type: string
+  name: Highlight
+  description: Comma-separated words; models whose name contains one are shown inverted. Empty = none.
+  optional: true
+  placeholder: claude, mistral
+- keyname: title
+  field_type: string
+  name: Screen title
+  description: Empty = "LLM Leaderboards".
+  optional: true
+  placeholder: LLM Leaderboards
+- keyname: aa_api_key
+  field_type: string
+  name: Artificial Analysis API key
+  description: Only for the Artificial Analysis leaderboards. Free tier, 100 requests per day.
+  help_text: Create a free key on <a href="https://artificialanalysis.ai/data-api" class="underline">artificialanalysis.ai/data-api</a>. Attribution to Artificial Analysis is required and shown under the leaderboard title.
+  optional: true
+  placeholder: aa_...
+- keyname: livebench_version
+  field_type: string
+  name: LiveBench version
+  description: Release date of the LiveBench table, e.g. 2026-06-25. Empty = the newest version known to the plugin.
+  help_text: LiveBench publishes a new table a few times a year; the current one is on <a href="https://livebench.ai" class="underline">livebench.ai</a>.
+  optional: true
+  placeholder: 2026-06-25
+- keyname: language
+  field_type: select
+  name: Language
+  description: Language of the on-screen labels. Auto follows your TRMNL account language.
+  options:
+  - Auto: auto
+  - English: en
+  - Français: fr
+  default: auto
+name: LLM Leaderboards
+description: Top models on LLM leaderboards
+refresh_interval: 360

@@ -1,0 +1,26 @@
+{%- comment -%}
+  Full screen (800x480): the selected leaderboards side by side (up to 3), max_models rows
+  each. On the OG the table fits 12 rows (11 with three boards, whose narrower columns put
+  the source line under the title); rows beyond that only show on large screens (TRMNL X).
+  With two boards the organisation is shown after the model name. In portrait orientation
+  the boards are stacked.
+{%- endcomment -%}
+{%- if boards.size > 2 -%}
+  {%- assign compact = true -%}{%- assign show_org = false -%}{%- assign cap = 11 -%}
+{%- else -%}
+  {%- assign compact = false -%}{%- assign show_org = true -%}{%- assign cap = 12 -%}
+{%- endif -%}
+{%- if error != "" -%}
+<div class="layout layout--col layout--center">
+  <span class="title title--small">{{ t_unavailable }}</span>
+  <span class="label label--small">{{ error }}</span>
+</div>
+{%- else -%}
+<div class="layout layout--row layout--stretch gap--large portrait:flex--col">
+  {%- for b in boards -%}
+    {% render 'board', board: b, n: max_models, cap: cap, compact: compact, hl: hl, hl_size: hl_size, show_org: show_org, table_class: "table--small", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models %}
+  {%- endfor -%}
+</div>
+{%- endif -%}
+
+{% render 'title_bar', title: screen_title, instance: title_instance %}

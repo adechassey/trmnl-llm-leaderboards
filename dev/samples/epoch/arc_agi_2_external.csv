@@ -1,0 +1,41 @@
+Model version,Score,Release date,Organization,Country,Training compute (FLOP),Training compute notes,Name,Cost per task,Notes,id
+gpt-6-astra_max,0.9500000000000001,2026-09-03,OpenAI,United States of America,,,GPT-6 Astra (Max),,,recqWVwwNamfxF1zu
+gpt-6-astra_xhigh,0.9333333333333333,2026-09-03,OpenAI,United States of America,,,GPT-6 Astra (XHigh),,,recuO4X9wY6J0GPRP
+gpt-5.6-sol_max,0.925,2026-07-09,OpenAI,United States of America,,,GPT-5.6 Sol (Max),1.44,,recIQjZYogw8GYgLW
+gpt-6-astra_high,0.9208333333333333,2026-09-03,OpenAI,United States of America,,,GPT-6 Astra (High),,,rec2IrmPOhpgWZ3Zl
+gpt-6-astra_medium,0.9208333333333333,2026-09-03,OpenAI,United States of America,,,GPT-6 Astra (Medium),,,recQLii7vQCYRgYaO
+claude-opus-5_max,0.9042,2026-07-24,Anthropic,United States of America,,,Claude Opus 5 (Max),,,recRyRMLEzUUt9Acr
+gpt-5.6-sol_xhigh,0.9,2026-07-09,OpenAI,United States of America,,,GPT-5.6 Sol (xHigh),1.04,,recjEDHJMdFvdEoxY
+gpt-5.6-sol_xhigh,0.9,2026-07-09,OpenAI,United States of America,,,GPT-5.6 Sol (XHigh),,,rechqnvfszeSZZcTx
+claude-fable-5-1_max,0.9,2026-09-01,Anthropic,United States of America,,,Claude Fable 5.1 (Max),,,recI68BcNmOFzBN1F
+claude-fable-5-1_xhigh,0.9,2026-09-01,Anthropic,United States of America,,,Claude Fable 5.1 (XHigh),,,recZtv97M9zVWp43I
+claude-fable-5_max,0.8916666666666667,2026-06-09,Anthropic,United States of America,,,Claude Fable 5 (Max),,,recu2ZdK004X3AWeO
+claude-fable-5-1_high,0.8875000000000001,2026-09-01,Anthropic,United States of America,,,Claude Fable 5.1 (High),,,recHs8jTkcWuXJSC9
+claude-fable-5_xhigh,0.8833333333333333,2026-06-09,Anthropic,United States of America,,,Claude Fable 5 (XHigh),,,rectyLB4NFarEdw0u
+claude-opus-5_max,0.8833,2026-07-24,Anthropic,United States of America,,,Claude Opus 5 (High),,,recKlOZaCgYdWkVtG
+claude-opus-5_high,0.8833,2026-07-24,Anthropic,United States of America,,,Claude Opus 5 (High),,,recB3Hc7Wjn7FZ2vt
+claude-fable-5_high,0.875,2026-06-09,Anthropic,United States of America,,,Claude Fable 5 (High),,,recoGNnJQf5s62aEC
+claude-fable-5-1_medium,0.8625,2026-09-01,Anthropic,United States of America,,,Claude Fable 5.1 (Medium),,,recT6vtsKxK14oaiK
+gpt-5.6-sol_high,0.8542000000000001,2026-07-09,OpenAI,United States of America,,,GPT-5.6 Sol (High),0.74,,recLS6d8WS2n1rGSY
+gpt-6-astra_low,0.8541666666666666,2026-09-03,OpenAI,United States of America,,,GPT-6 Astra (Low),,,recG9zf5LfCTMpwnb
+gpt-5.5_xhigh,0.85,2026-04-23,OpenAI,United States of America,,,GPT-5.5 (xHigh),1.87,,recPMkvFz7bdsGYig
+gpt-5.5_xhigh,0.85,2026-04-23,OpenAI,United States of America,,,GPT-5.5 (XHigh),,,recQa67QhUbEC1Z8v
+gemini-3.7-flash_high,0.8458333333333333,2026-08-13,Google DeepMind,United States of America,,,Gemini 3.7 Flash (High),,,reczv0UYeDcnI7XYG
+gemini-3-deep-think-preview,0.8458,2026-02-12,Google DeepMind,United States of America,,,Gemini 3 Deep Think (2/26),,,recMlHyQpZ45OKxQ0
+gpt-5.5-pro_high,0.8458,2026-04-23,OpenAI,United States of America,,,GPT-5.5 Pro (High),10.51,,recE8W46kbiuOPGxo
+gpt-5.5-pro_xhigh,0.8416,2026-04-23,OpenAI,United States of America,,,GPT-5.5 Pro (xHigh),10.76,,recgSWEl9GTw04NMC
+gpt-5.5-pro_xhigh,0.8416,2026-04-23,OpenAI,United States of America,,,GPT-5.5 Pro (XHigh),,,recCsqWAVFHQVM3mx
+gpt-5.6-terra_max,0.839,2026-07-09,OpenAI,United States of America,,,GPT-5.6 Terra (Max),1.09,,rec6orAgSUYUy5B5x
+gpt-5.4-pro-2026-03-05_xhigh,0.8333,2026-03-05,OpenAI,United States of America,,,GPT-5.4 Pro (xHigh),16.41,,recQTn93SRyeXe4j7
+gpt-5.5_high,0.8333,2026-04-23,OpenAI,United States of America,,,GPT-5.5 (High),1.45,,reclzZXNkcRC5jiKS
+gpt-5.4-pro-2026-03-05_xhigh,0.8333,2026-03-05,OpenAI,United States of America,,,GPT-5.4 Pro (XHigh),,,recoggJGwWvf6rzzm
+claude-fable-5_medium,0.8250000000000001,2026-06-09,Anthropic,United States of America,,,Claude Fable 5 (Medium),,,recOj0wdwD2kU9r8l
+claude-fable-5-1_low,0.7833333333333333,2026-09-01,Anthropic,United States of America,,,Claude Fable 5.1 (Low),,,recgGXbNz9PP5hyy2
+gemini-3.1-pro-preview,0.771,2026-02-19,Google DeepMind,United States of America,,,Gemini 3.1 Pro (Preview,0.9622,,recqiypjdc93Zi185
+gemini-3.1-pro-preview,0.7708,2026-02-19,Google DeepMind,United States of America,,,Gemini 3.1 Pro (Preview),0.9622,,recbE2tiH9D8MeBaF
+claude-fable-5_low,0.7680555555555555,2026-06-09,Anthropic,United States of America,,,Claude Fable 5 (Low),,,rech4ukMMdk3W0Q5a
+claude-opus-4-7_max,0.7583,2026-04-16,Anthropic,United States of America,,,Claude 4.7 (Max),,,rectnLtWG36YhOCLr
+claude-opus-4-7_max,0.758,2026-04-16,Anthropic,United States of America,,,Claude Opus 4.7 (Max),7.43,,reckzAUlEOn9DIazK
+gpt-5.6-terra_xhigh,0.7417,2026-07-09,OpenAI,United States of America,,,GPT-5.6 Terra (xHigh),0.69,,rec86VcvrMgRUOXNK
+gpt-5.6-terra_xhigh,0.7417,2026-07-09,OpenAI,United States of America,,,GPT-5.6 Terra (XHigh),,,recU58jwAC2hZugaR
+gpt-5.4-2026-03-05_xhigh,0.7395,2026-03-05,OpenAI,United States of America,,,GPT-5.4 (xHigh),1.52,,receOCJkifwiw4KJD

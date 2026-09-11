@@ -1,0 +1,147 @@
+{%- comment -%}
+  LLM Leaderboards: data preparation.
+
+  TRMNL prepends this file to every layout. It defines the shared `title_bar` and `board`
+  templates and the Liquid variables used by full / half_* / quadrant:
+    - error         : error message ("" when at least one board can be shown)
+    - boards        : from the Serverless function src/transform.py, one entry per selected
+                      leaderboard: title, source (domain), date (ISO or ""), unit, rows
+                      (rank, model, org, score, open) and error
+    - max_models    : rows requested by the user for the full layout
+    - hl, hl_size   : lowercase words from the "Highlight" field
+    - screen_title  : title bar text
+    - now_local     : render time in the user's time zone
+    - lang, t_*     : on-screen language (en / fr) and the translated labels
+
+  Fields read by the Serverless function rather than by the markup: board_1, board_2,
+  board_3, open_weights_only, aa_api_key, livebench_version (see src/transform.py).
+{%- endcomment -%}
+
+
+{%- comment -%} Shared title bar; the closing tag must be written exactly {% endtemplate %} {%- endcomment -%}
+{% template title_bar %}
+<div class="title_bar">
+  <span class="title">{{ title }}</span>
+  <span class="instance">{{ instance }}</span>
+</div>
+{% endtemplate %}
+
+{%- comment -%}
+  One leaderboard: title, source and date, then a rank / model / score table.
+  Arguments: board, n (rows), cap (rows visible on the OG; rows cap+1..n only show on large
+  screens), compact (source line under the title, for narrow columns), hl + hl_size
+  (highlight words), show_org, table_class, date_fmt, t_model, t_no_models.
+{%- endcomment -%}
+{% template board %}
+<div class="flex flex--col stretch-x">
+  {%- if compact -%}
+  <div class="flex flex--col">
+    <span class="title title--small">{{ board.title }}</span>
+    <span class="label label--small">{{ board.source }}{% if board.date != blank %} · {{ board.date | date: date_fmt }}{% endif %}</span>
+  </div>
+  {%- else -%}
+  <div class="flex flex--row flex--between flex--bottom gap--small">
+    <span class="title title--small">{{ board.title }}</span>
+    <span class="label label--small">{{ board.source }}{% if board.date != blank %} · {{ board.date | date: date_fmt }}{% endif %}</span>
+  </div>
+  {%- endif -%}
+  {%- if board.error != blank -%}
+  <span class="label label--small">{{ board.error }}</span>
+  {%- elsif board.rows.size == 0 -%}
+  <span class="label label--small">{{ t_no_models }}</span>
+  {%- else -%}
+  <table class="table {{ table_class }}" data-table-limit="true">
+    <thead>
+      <tr>
+        <th class="w--8"><span class="title title--small">#</span></th>
+        <th><span class="title title--small">{{ t_model }}</span></th>
+        <th class="w--16 text--right"><span class="title title--small">{{ board.unit }}</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for r in board.rows limit: n -%}
+        {%- assign hit = false -%}
+        {%- if hl_size > 0 -%}
+          {%- assign m = r.model | downcase -%}
+          {%- for h in hl -%}{%- if h != "" and m contains h -%}{%- assign hit = true -%}{%- endif -%}{%- endfor -%}
+        {%- endif -%}
+        {%- if forloop.index > cap -%}{%- assign row_class = "hidden lg:table-row" -%}{%- else -%}{%- assign row_class = "" -%}{%- endif -%}
+        <tr class="{{ row_class }}">
+          <td class="w--8"><span class="label label--small">{{ r.rank }}</span></td>
+          <td>
+            <span class="label label--small{% if hit %} label--filled{% endif %}">{{ r.model }}</span>
+            {%- if show_org and r.org != blank %} <span class="label label--small label--gray-out">{{ r.org }}</span>{%- endif -%}
+          </td>
+          <td class="w--16 text--right"><span class="value value--xxsmall value--tnums">{{ r.score }}</span></td>
+        </tr>
+      {%- endfor -%}
+    </tbody>
+  </table>
+  {%- endif -%}
+</div>
+{% endtemplate %}
+
+{%- assign cf = trmnl.plugin_settings.custom_fields_values -%}
+
+{%- comment -%} Render clock (UTC seconds) and local time {%- endcomment -%}
+{%- assign now_ts = trmnl.system.timestamp_utc -%}
+{%- if now_ts == blank -%}{%- assign now_ts = "now" | date: "%s" -%}{%- endif -%}
+{%- assign now_ts = now_ts | plus: 0 -%}
+{%- assign utc_offset = trmnl.user.utc_offset | default: 0 | plus: 0 -%}
+{%- assign now_local = now_ts | plus: utc_offset | date: "%H:%M" -%}
+
+{%- assign max_models = cf.max_models | default: 10 | plus: 0 -%}
+{%- if max_models < 1 -%}{%- assign max_models = 10 -%}{%- endif -%}
+{%- if max_models > 15 -%}{%- assign max_models = 15 -%}{%- endif -%}
+
+{%- comment -%} Highlight words: lowercase, trimmed around the commas {%- endcomment -%}
+{%- assign hl_raw = cf.highlight | default: "" | downcase | strip | replace: " ,", "," | replace: ", ", "," -%}
+{%- if hl_raw == "" -%}
+  {%- assign hl_size = 0 -%}
+  {%- assign hl = "" | split: "," -%}
+{%- else -%}
+  {%- assign hl = hl_raw | split: "," -%}
+  {%- assign hl_size = hl.size -%}
+{%- endif -%}
+
+{%- comment -%}
+  On-screen language: the `language` field (auto / en / fr). "auto" follows the TRMNL
+  account locale (trmnl.user.locale). Every label used by the layouts is a t_* variable;
+  add a language by adding a branch here. Error messages from transform.py stay in English.
+{%- endcomment -%}
+{%- assign lang = cf.language | default: "auto" | downcase -%}
+{%- if lang == "auto" or lang == "" -%}
+  {%- assign lang = trmnl.user.locale | default: "en" | downcase | slice: 0, 2 -%}
+{%- endif -%}
+{%- if lang == "fr" -%}
+  {%- assign t_title = "Classements LLM" -%}
+  {%- assign t_model = "Modèle" -%}
+  {%- assign t_no_models = "Aucun modèle" -%}
+  {%- assign t_updated = "Mis à jour" -%}
+  {%- assign t_unavailable = "Données indisponibles" -%}
+  {%- assign t_no_data = "Pas de données : la fonction Serverless du plugin n'a pas répondu." -%}
+  {%- assign date_fmt = "%-d %b" -%}
+{%- else -%}
+  {%- assign lang = "en" -%}
+  {%- assign t_title = "LLM Leaderboards" -%}
+  {%- assign t_model = "Model" -%}
+  {%- assign t_no_models = "No models" -%}
+  {%- assign t_updated = "Updated" -%}
+  {%- assign t_unavailable = "Data unavailable" -%}
+  {%- assign t_no_data = "No data: the plugin's Serverless function did not respond." -%}
+  {%- assign date_fmt = "%b %-d" -%}
+{%- endif -%}
+
+{%- comment -%} Serverless function output: `boards`, `error` {%- endcomment -%}
+{%- assign api_error = error | default: "" -%}
+{%- assign error = "" -%}
+{%- if boards == nil -%}
+  {%- assign error = t_no_data -%}
+{%- elsif boards.size == 0 -%}
+  {%- assign error = api_error -%}
+  {%- if error == "" -%}{%- assign error = t_no_models -%}{%- endif -%}
+{%- endif -%}
+
+{%- assign screen_title = cf.title | default: "" | strip -%}
+{%- if screen_title == "" -%}{%- assign screen_title = t_title -%}{%- endif -%}
+{%- assign title_instance = t_updated | append: " " | append: now_local -%}

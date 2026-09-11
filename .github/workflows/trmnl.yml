@@ -1,0 +1,23 @@
+name: TRMNL
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Checks the plugin with `trmnlp lint` and the smoke test (offline samples, no network).
+# Deploying to TRMNL stays manual (`bin/trmnlp push`): an automatic push without an `id`
+# in src/settings.yml would create a new plugin on every commit.
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+      - run: gem install trmnl_preview
+      - run: trmnlp lint
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 dev/smoke.py

@@ -1,0 +1,18 @@
+{%- comment -%}
+  Quadrant (400x240 on the OG, twice that on TRMNL X): the first leaderboard only, 5 rows on
+  the OG and up to 8 on large screens.
+{%- endcomment -%}
+{%- assign n = max_models -%}
+{%- if n > 8 -%}{%- assign n = 8 -%}{%- endif -%}
+{%- if error != "" -%}
+<div class="layout layout--col layout--center">
+  <span class="title title--small">{{ t_unavailable }}</span>
+</div>
+{%- else -%}
+<div class="layout layout--col layout--top layout--stretch-x">
+  {%- assign b = boards[0] -%}
+  {% render 'board', board: b, n: n, cap: 5, compact: false, hl: hl, hl_size: hl_size, show_org: false, table_class: "table--xsmall", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models %}
+</div>
+{%- endif -%}
+
+{% render 'title_bar', title: screen_title, instance: now_local %}

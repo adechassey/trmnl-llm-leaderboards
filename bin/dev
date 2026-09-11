@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#
+# Local preview of the plugin.
+#   bin/dev            -> live data (the Serverless function fetches the leaderboards)
+#   bin/dev fixture    -> offline sample data from dev/samples, no network
+# Extra options are passed to `trmnlp serve` (e.g. --port 5000).
+#
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# trmnlp installed through RubyGems is not necessarily on the PATH
+if command -v gem >/dev/null 2>&1; then
+  export PATH="$(gem environment gemdir)/bin:$PATH"
+fi
+
+# Optional Artificial Analysis key for the AA boards: AA_API_KEY in the environment or in
+# ./.env (git-ignored). The function reads it when the plugin field is empty.
+if [ -f .env ]; then
+  set -a; . ./.env; set +a
+fi
+
+if [ "${1:-}" = "fixture" ]; then
+  shift
+  exec bin/trmnlp serve --dir dev/fixture "$@"
+fi
+
+if [ ! -f .trmnlp.yml ]; then
+  cp dev/trmnlp.example.yml .trmnlp.yml
+  echo "→ .trmnlp.yml created from dev/trmnlp.example.yml"
+fi
+
+exec bin/trmnlp serve "$@"

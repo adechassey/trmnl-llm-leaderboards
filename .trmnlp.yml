@@ -1,0 +1,18 @@
+---
+watch:
+- ".trmnlp.yml"
+- src
+time_zone: Europe/Paris
+custom_fields:
+  board_1: arena_text
+  board_2: epoch_eci
+  board_3: none
+  max_models: '10'
+  open_weights_only: 'no'
+  highlight: ''
+  title: ''
+  aa_api_key: ''
+  livebench_version: ''
+  language: auto
+variables:
+  trmnl: {}
