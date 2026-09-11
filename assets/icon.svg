@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- LLM Leaderboards: a podium with a star on the winner's step, monochrome (e-ink friendly) -->
+  <!-- LLM Leaderboards: a podium with a star above the winner's step, monochrome (e-ink friendly) -->
   <rect width="512" height="512" rx="112" fill="#000"/>
+  <!-- star: 5 points, outer radius 78, inner radius 32, centred on (256,138), well clear of the podium -->
+  <polygon points="256,60 274.8,112.1 330.2,113.9 286.4,147.9 301.8,201.1 256,170 210.2,201.1 225.6,147.9 181.8,113.9 237.2,112.1" fill="#fff"/>
   <!-- podium steps: 2nd, 1st, 3rd -->
-  <rect x="88" y="264" width="104" height="160" rx="12" fill="#fff"/>
-  <rect x="204" y="184" width="104" height="240" rx="12" fill="#fff"/>
-  <rect x="320" y="312" width="104" height="112" rx="12" fill="#fff"/>
+  <rect x="88" y="296" width="104" height="128" rx="12" fill="#fff"/>
+  <rect x="204" y="232" width="104" height="192" rx="12" fill="#fff"/>
+  <rect x="320" y="336" width="104" height="88" rx="12" fill="#fff"/>
   <!-- ranks -->
-  <text x="140" y="352" font-family="Helvetica, Arial, sans-serif" font-size="64" font-weight="700" text-anchor="middle" fill="#000">2</text>
-  <text x="256" y="312" font-family="Helvetica, Arial, sans-serif" font-size="80" font-weight="700" text-anchor="middle" fill="#000">1</text>
-  <text x="372" y="392" font-family="Helvetica, Arial, sans-serif" font-size="56" font-weight="700" text-anchor="middle" fill="#000">3</text>
-  <!-- star above the winner -->
-  <polygon points="256,72 275,122 328,124 286,156 301,208 256,178 211,208 226,156 184,124 237,122" fill="#fff"/>
+  <text x="140" y="378" font-family="Helvetica, Arial, sans-serif" font-size="60" font-weight="700" text-anchor="middle" fill="#000">2</text>
+  <text x="256" y="348" font-family="Helvetica, Arial, sans-serif" font-size="76" font-weight="700" text-anchor="middle" fill="#000">1</text>
+  <text x="372" y="400" font-family="Helvetica, Arial, sans-serif" font-size="52" font-weight="700" text-anchor="middle" fill="#000">3</text>
   <!-- base line -->
   <rect x="72" y="436" width="368" height="16" rx="8" fill="#fff"/>
 </svg>
