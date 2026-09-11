@@ -366,7 +366,7 @@ def _load_livebench(spec, ctx):
 def _load_aa(spec, ctx):
     if not ctx.aa_key:
         raise FetchError("Add your free Artificial Analysis API key in the plugin settings.")
-    entries, page = [], 1
+    best, page = {}, 1
     while page <= AA_MAX_PAGES:
         url = AA_MODELS + ("?page=%d" % page if page > 1 else "")
         try:
@@ -379,15 +379,22 @@ def _load_aa(spec, ctx):
             v = _num(_dig(m, "evaluations", spec["key"]))
             if v is None:
                 continue
-            entries.append({"model": m.get("name") or m.get("slug") or "", "org": _dig(m, "model_creator", "name") or "",
-                            "value": v, "open": _aa_open(m), "score": "%.1f" % v,
-                            "price_in": _num(_dig(m, "pricing", "price_1m_input_tokens")),
-                            "price_out": _num(_dig(m, "pricing", "price_1m_output_tokens")),
-                            "released": _iso_date(m.get("release_date"))})
+            # one row per model: "Claude Fable 5.1 (Adaptive Reasoning, Max Effort, ...)" and its
+            # other reasoning settings collapse to the best one, under the plain name
+            name = _clean(re.sub(r"\s*\([^)]*\)\s*$", "", m.get("name") or "")) or m.get("slug") or ""
+            if not name:
+                continue
+            entry = {"model": name, "org": _dig(m, "model_creator", "name") or "",
+                     "value": v, "open": _aa_open(m), "score": "%.1f" % v,
+                     "price_in": _num(_dig(m, "pricing", "price_1m_input_tokens")),
+                     "price_out": _num(_dig(m, "pricing", "price_1m_output_tokens")),
+                     "released": _iso_date(m.get("release_date"))}
+            if name not in best or v > best[name]["value"]:
+                best[name] = entry
         if not (data.get("pagination") or {}).get("has_more"):
             break
         page += 1
-    return entries, ""
+    return list(best.values()), ""
 
 
 LOADERS = {"arena": _load_arena, "eci": _load_eci, "epoch": _load_epoch, "livebench": _load_livebench, "aa": _load_aa}

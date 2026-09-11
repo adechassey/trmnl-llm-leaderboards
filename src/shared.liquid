@@ -28,8 +28,8 @@
 
 {%- comment -%}
   One leaderboard: title, source and date, then a rank / model / score table, plus a price
-  column ($ per million tokens, input/output) when the function found prices and a "new"
-  badge on models released in the last two weeks.
+  column ("10/50" = $10 per million input tokens, $50 per million output tokens) when the
+  function found prices, and a "new" badge on models released in the last two weeks.
   Arguments: board, n (rows), cap (rows visible on the OG; rows cap+1..n only show on large
   screens), compact (source line under the title, for narrow columns), price_class (extra
   classes of the price cells, e.g. "hidden lg:table-cell" to keep them for large screens),
@@ -129,7 +129,7 @@
   {%- assign t_updated = "Mis à jour" -%}
   {%- assign t_unavailable = "Données indisponibles" -%}
   {%- assign t_no_data = "Pas de données : la fonction Serverless du plugin n'a pas répondu." -%}
-  {%- assign t_price = "$/1M" -%}
+  {%- assign t_price = "$ in/out" -%}
   {%- assign t_new = "nouveau" -%}
   {%- assign date_fmt = "%-d %b" -%}
 {%- else -%}
@@ -140,7 +140,7 @@
   {%- assign t_updated = "Updated" -%}
   {%- assign t_unavailable = "Data unavailable" -%}
   {%- assign t_no_data = "No data: the plugin's Serverless function did not respond." -%}
-  {%- assign t_price = "$/1M" -%}
+  {%- assign t_price = "$ in/out" -%}
   {%- assign t_new = "new" -%}
   {%- assign date_fmt = "%b %-d" -%}
 {%- endif -%}
