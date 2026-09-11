@@ -174,7 +174,7 @@ custom_fields:
   description: Release date of the LiveBench table, e.g. 2026-06-25. Empty = the newest version known to the plugin.
   help_text: LiveBench publishes a new table a few times a year; the current one is on <a href="https://livebench.ai" class="underline">livebench.ai</a>.
   optional: true
-  placeholder: 2026-06-25
+  placeholder: '2026-06-25'
 - keyname: language
   field_type: select
   name: Language
