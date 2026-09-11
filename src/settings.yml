@@ -33,7 +33,7 @@ custom_fields:
 - keyname: about
   field_type: author_bio
   name: About This Plugin
-  category: technology
+  category: analytics,programming
   description: Top models on the main LLM benchmark leaderboards, up to three side by side. Arena (LMArena) Elo, the Epoch Capabilities Index and Epoch AI's benchmark tables (GPQA Diamond, SWE-bench Verified, FrontierMath, Terminal-Bench, ARC-AGI-2...), LiveBench, and the Artificial Analysis indices with your free key. No server needed. Labels in English or French.
   github_url: https://github.com/adechassey/trmnl-llm-leaderboards
   learn_more_url: https://epoch.ai/benchmarks
