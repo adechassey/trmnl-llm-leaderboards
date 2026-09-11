@@ -130,8 +130,10 @@ If TRMNL does not recognise the `text/plain` JSON, the function fetches the poin
   framework classes only; the outermost node of every view is the `layout` element.
 - Framework classes used (checked in `https://trmnl.com/css/latest/plugins.css`): `layout--row`,
   `layout--stretch-x`, `gap--large`, `portrait:flex--col`, `flex--between`, `flex--bottom`,
-  `stretch-x`, `table--small`, `w--8`, `w--16`, `text--right`, `label--filled`, `label--gray-out`,
-  `value--xxsmall`, `value--tnums`. `label--xsmall` and `title--xsmall` do not exist.
+  `table--small`, `w--8`, `w--16`, `text--right`, `label--filled`, `label--gray` (same rule as
+  the older `label--gray-out`), `label--underline`, `value--xxsmall`, `value--tnums`.
+  `label--xsmall` and `title--xsmall` do not exist. `layout--stretch > *` already gives the
+  children `flex: 1 1 0%`, so a `stretch-x` on them is redundant (Chef's review, 2026-09-11).
 - `{% template %}` partials take explicit arguments with `{% render %}`; loops inside work.
 - The framework's table overflow engine (`data-table-limit="true"`, in `plugins.js`) hides
   rows beyond `table.parentElement.clientHeight` minus the `thead` height. Inside a board
