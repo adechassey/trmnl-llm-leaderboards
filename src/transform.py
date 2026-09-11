@@ -11,6 +11,9 @@ Sources, all public:
     SWE-bench Verified, FrontierMath, Terminal-Bench, ...).
   - LiveBench: `table_<version>.csv` and `categories_<version>.json` on livebench.ai.
   - Artificial Analysis: `/api/v2/language/models/free`, with the user's free API key.
+  - OpenRouter `/api/v1/models` (no key): input / output prices per million tokens, matched to
+    the leaderboard rows by normalised model name, and the date a model was listed, used as
+    its release date when the leaderboard has none (Arena, LiveBench).
 
 Why the function fetches instead of TRMNL polling everything: the Arena snapshot lives at
 a dated path only known from the pointer, the Epoch tables are inside a zip, and only the
@@ -20,15 +23,18 @@ TRMNL's 5 s limit and reports a per-board error instead of failing the whole scr
 Input `input`: the plugin variables, including
   - the polled Arena pointer (`date`, `path`) merged at the top level by TRMNL
   - trmnl.plugin_settings.custom_fields_values: board_1..3, max_models, open_weights_only,
-    highlight, aa_api_key, livebench_version, language
-  - `sources` (fixtures only): {url_or_zip_member: text} used instead of the network, and
-    `offline: true` to forbid any network call
+    show_prices, highlight, aa_api_key, livebench_version, language
+  - `sources` (fixtures only): {url_or_zip_member: text} used instead of the network,
+    `offline: true` to forbid any network call, `now` (epoch) to freeze the clock
 
 Output: {"boards": [...], "error": str, "generated_at": epoch}
   each board: {"id", "title", "source" (domain, for attribution), "date" (ISO, may be ""),
-               "unit", "rows": [{"rank", "model", "org", "score", "open"}], "error"}
+               "unit", "has_price", "has_new", "error",
+               "rows": [{"rank", "model", "org", "score", "open", "price", "released", "new"}]}
   rows are sorted best first; `rank` is the position in the full list before the
-  open-weights filter, `score` is already formatted, `open` is true/false/null (unknown).
+  open-weights filter, `score` and `price` ("10/50" = $ per million input / output tokens,
+  "" when unknown) are already formatted, `open` is true/false/null (unknown), `new` is true
+  when the model was released less than NEW_DAYS ago.
 """
 import csv
 import io
@@ -58,6 +64,12 @@ LIVEBENCH = "https://livebench.ai/"
 LIVEBENCH_VERSION = "2026_06_25"  # newest release known to this code; the field overrides it
 AA_MODELS = "https://artificialanalysis.ai/api/v2/language/models/free"
 AA_MAX_PAGES = 3
+OPENROUTER_MODELS = "https://openrouter.ai/api/v1/models"
+NEW_DAYS = 14  # a model released less than this many days ago is flagged "new"
+
+# Name tokens that distinguish runs of the same model, not the model itself (price lookups)
+VARIANT_TOKENS = {"max", "xhigh", "high", "medium", "low", "minimal", "thinking", "nothinking", "effort",
+                  "reasoning", "auto", "preview", "exp", "latest"}
 
 SOURCES = {"arena": "arena.ai", "eci": "epoch.ai", "epoch": "epoch.ai",
            "livebench": "livebench.ai", "aa": "artificialanalysis.ai"}
@@ -146,9 +158,11 @@ def run(input):
     ctx = Context(
         fetcher=Fetcher(seed=_seed_sources(input), offline=bool(input.get("offline")), budget=TIME_BUDGET),
         max_models=_clamp(_to_int(cf.get("max_models"), DEFAULT_MODELS), 1, MAX_MODELS),
-        open_only=str(cf.get("open_weights_only") or "no").strip().lower() in ("yes", "true", "1"),
+        open_only=_yes(cf.get("open_weights_only"), False),
+        prices=_yes(cf.get("show_prices"), True),
         aa_key=_aa_key(cf),
         livebench_version=_livebench_version(cf.get("livebench_version")),
+        now=_to_int(input.get("now"), 0) or int(time.time()),
     )
     for board_id in ids:
         result["boards"].append(_build_board(board_id, ctx))
@@ -160,14 +174,29 @@ def run(input):
 # --- boards -------------------------------------------------------------------------------------
 
 class Context(object):
-    def __init__(self, fetcher, max_models, open_only, aa_key, livebench_version):
+    def __init__(self, fetcher, max_models, open_only, prices, aa_key, livebench_version, now):
         self.fetcher = fetcher
         self.max_models = max_models
         self.open_only = open_only
+        self.prices = prices
         self.aa_key = aa_key
         self.livebench_version = livebench_version
+        self.now = now
         self._epoch_meta = None
         self._epoch_models = None
+        self._price_book = None
+
+    def price_book(self):
+        """Normalised model name -> {"in", "out", "released"} from OpenRouter; {} when the
+        prices are disabled or OpenRouter cannot be read (prices are optional)."""
+        if self._price_book is None:
+            self._price_book = {}
+            if self.prices:
+                try:
+                    self._price_book = _openrouter_prices(_json(self.fetcher.text(OPENROUTER_MODELS), "openrouter.ai"))
+                except FetchError:
+                    pass
+        return self._price_book
 
     def epoch_benchmark_meta(self):
         """source_file -> {score_column, scale, ...} from benchmark_metadata.csv."""
@@ -197,7 +226,7 @@ class Context(object):
 def _build_board(board_id, ctx):
     spec = BOARDS.get(board_id)
     board = {"id": board_id, "title": spec["title"] if spec else board_id, "source": "", "date": "",
-             "unit": spec["unit"] if spec else "", "rows": [], "error": ""}
+             "unit": spec["unit"] if spec else "", "has_price": False, "has_new": False, "rows": [], "error": ""}
     if not spec:
         board["error"] = "Unknown leaderboard '%s'." % board_id
         return board
@@ -211,22 +240,32 @@ def _build_board(board_id, ctx):
         board["error"] = "Unexpected %s data (%s)." % (board["source"], e.__class__.__name__)
         return board
     board["date"] = date
-    board["rows"] = _rank(entries, ctx.max_models, ctx.open_only)
+    board["rows"] = _rank(entries, ctx)
+    board["has_price"] = any(r["price"] for r in board["rows"])
+    board["has_new"] = any(r["new"] for r in board["rows"])
     if not board["rows"] and not entries:
         board["error"] = "%s returned no models." % board["source"]
     return board
 
 
-def _rank(entries, max_models, open_only):
-    """Best first; rank = position in the full list, so a filtered board keeps real ranks."""
+def _rank(entries, ctx):
+    """Best first; rank = position in the full list, so a filtered board keeps real ranks.
+    Adds the price and release date (from the source itself, else from OpenRouter)."""
     entries = sorted(entries, key=lambda e: -e["value"])
     rows = []
     for position, e in enumerate(entries, 1):
-        if open_only and e["open"] is False:
+        if ctx.open_only and e["open"] is False:
             continue
+        listed = _price_lookup(e["model"], ctx.price_book()) if ctx.prices else None
+        price_in, price_out = e.get("price_in"), e.get("price_out")
+        if ctx.prices and price_in is None and listed:
+            price_in, price_out = listed["in"], listed["out"]
+        released = e.get("released") or (listed["released"] if listed else "")
         rows.append({"rank": position, "model": _clean(e["model"]), "org": _short_org(e["org"]),
-                     "score": e["score"], "open": e["open"]})
-        if len(rows) >= max_models:
+                     "score": e["score"], "open": e["open"],
+                     "price": _fmt_price_pair(price_in, price_out) if ctx.prices else "",
+                     "released": released, "new": _is_new(released, ctx.now)})
+        if len(rows) >= ctx.max_models:
             break
     return rows
 
@@ -261,7 +300,7 @@ def _load_eci(spec, ctx):
             continue
         entries.append({"model": r.get("Display name") or r.get("Model") or "", "org": r.get("Organization") or "",
                         "value": v, "open": _open_from_accessibility(r.get("Accessibility group") or r.get("Model accessibility")),
-                        "score": "%.1f" % v})
+                        "score": "%.1f" % v, "released": _iso_date(r.get("date"))})
         dates.append(_iso_date(r.get("date")))
     return entries, max(dates) if dates else ""
 
@@ -290,7 +329,8 @@ def _load_epoch(spec, ctx):
             shown = v * scale * 100.0
             score = "%.1f" % shown
         entry = {"model": group, "org": m.get("organization") or r.get("Organization") or r.get("Model Org") or "",
-                 "value": shown, "open": _open_from_accessibility(m.get("accessibility")), "score": score}
+                 "value": shown, "open": _open_from_accessibility(m.get("accessibility")), "score": score,
+                 "released": _iso_date(m.get("date")) or _iso_date(r.get("Release date"))}
         if group not in best or shown > best[group]["value"]:
             best[group] = entry
         dates.append(_row_date(r))
@@ -340,7 +380,10 @@ def _load_aa(spec, ctx):
             if v is None:
                 continue
             entries.append({"model": m.get("name") or m.get("slug") or "", "org": _dig(m, "model_creator", "name") or "",
-                            "value": v, "open": _aa_open(m), "score": "%.1f" % v})
+                            "value": v, "open": _aa_open(m), "score": "%.1f" % v,
+                            "price_in": _num(_dig(m, "pricing", "price_1m_input_tokens")),
+                            "price_out": _num(_dig(m, "pricing", "price_1m_output_tokens")),
+                            "released": _iso_date(m.get("release_date"))})
         if not (data.get("pagination") or {}).get("has_more"):
             break
         page += 1
@@ -348,6 +391,71 @@ def _load_aa(spec, ctx):
 
 
 LOADERS = {"arena": _load_arena, "eci": _load_eci, "epoch": _load_epoch, "livebench": _load_livebench, "aa": _load_aa}
+
+
+# --- prices and release dates (OpenRouter) ----------------------------------------------------
+
+def _openrouter_prices(data):
+    """Normalised name -> {"in", "out", "released"} ($ per million tokens, ISO date the model was
+    listed). Each model is indexed under its display name and its slug, raw and without variant
+    tokens; the first listing wins so a plain model beats its ':free' or aliased variants."""
+    book = {}
+    for m in data.get("data") or []:
+        if not isinstance(m, dict) or m.get("alias_target") or str(m.get("id", "")).endswith(":free"):
+            continue
+        pricing = m.get("pricing") or {}
+        price_in, price_out = _num(pricing.get("prompt")), _num(pricing.get("completion"))
+        if price_in is None or price_out is None:
+            continue
+        created = _num(m.get("created"))
+        entry = {"in": price_in * 1e6, "out": price_out * 1e6,
+                 "released": datetime.utcfromtimestamp(created).strftime("%Y-%m-%d") if created else ""}
+        names = [m.get("name") or "", str(m.get("id") or "").split("/", 1)[-1]]
+        for name in names:
+            for key in (_norm_name(name), _norm_name(name, strip_variants=True)):
+                if key and key not in book:
+                    book[key] = entry
+    return book
+
+
+def _price_lookup(model, book):
+    if not book:
+        return None
+    return book.get(_norm_name(model)) or book.get(_norm_name(model, strip_variants=True))
+
+
+def _norm_name(name, strip_variants=False):
+    """'Anthropic: Claude Opus 4.6' / 'claude-opus-4-6-high' / 'Claude Opus 4.6 (high)' ->
+    'claudeopus46' (with strip_variants) so the same model matches across sources."""
+    text = str(name or "").lower().split(": ", 1)[-1]  # OpenRouter prefixes the vendor
+    text = re.sub(r"\([^)]*\)", " ", text)
+    text = re.sub(r"\b\d{4}-\d{2}-\d{2}\b|\b20\d{6}\b|-\d{4}(?!-\d)\b", " ", text)  # dated snapshots
+    tokens = re.split(r"[^a-z0-9.]+", text)
+    if strip_variants:
+        tokens = [t for t in tokens if t not in VARIANT_TOKENS]
+    return re.sub(r"[^a-z0-9]", "", "".join(tokens))
+
+
+def _fmt_price_pair(price_in, price_out):
+    if price_in is None or price_out is None:
+        return ""
+    return "%s/%s" % (_fmt_price(price_in), _fmt_price(price_out))
+
+
+def _fmt_price(value):
+    """$ per million tokens, compact: 0.75, 1.25, 5, 10, 180."""
+    text = "%.2f" % value if value < 10 else "%.0f" % value
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
+def _is_new(released, now):
+    if not released:
+        return False
+    try:
+        age = now - int((datetime.strptime(released[:10], "%Y-%m-%d") - datetime(1970, 1, 1)).total_seconds())
+    except ValueError:
+        return False
+    return 0 <= age < NEW_DAYS * 86400
 
 
 # --- fetching --------------------------------------------------------------------------------------
@@ -432,9 +540,18 @@ def _custom_fields(input):
     cf = _dig(input, "trmnl", "plugin_settings", "custom_fields_values")
     if isinstance(cf, dict) and cf:
         return cf
-    keys = ("board_1", "board_2", "board_3", "max_models", "open_weights_only", "highlight",
+    keys = ("board_1", "board_2", "board_3", "max_models", "open_weights_only", "show_prices", "highlight",
             "aa_api_key", "livebench_version")
     return {k: input.get(k) for k in keys if k in input}
+
+
+def _yes(value, default):
+    text = str(value if value is not None else "").strip().lower()
+    if text in ("yes", "true", "1", "on"):
+        return True
+    if text in ("no", "false", "0", "off"):
+        return False
+    return default
 
 
 def _selected_boards(cf):

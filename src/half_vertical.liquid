@@ -17,7 +17,7 @@
 {%- else -%}
 <div class="layout layout--col layout--top layout--stretch-x gap--medium">
   {%- for b in boards limit: 2 -%}
-    {% render 'board', board: b, n: n, cap: cap, compact: false, hl: hl, hl_size: hl_size, show_org: false, table_class: "table--xsmall", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models %}
+    {% render 'board', board: b, n: n, cap: cap, compact: false, price_class: "", hl: hl, hl_size: hl_size, org_class: "hidden", table_class: "table--xsmall", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
   {%- endfor -%}
 </div>
 {%- endif -%}

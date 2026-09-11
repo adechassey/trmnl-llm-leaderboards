@@ -2,13 +2,16 @@
   Full screen (800x480): the selected leaderboards side by side (up to 3), max_models rows
   each. On the OG the table fits 12 rows (11 with three boards, whose narrower columns put
   the source line under the title); rows beyond that only show on large screens (TRMNL X).
-  With two boards the organisation is shown after the model name. In portrait orientation
-  the boards are stacked.
+  With two boards the organisation follows the model name, on the OG only when the price
+  column is off (both would wrap long names). In portrait orientation the boards are stacked.
 {%- endcomment -%}
 {%- if boards.size > 2 -%}
-  {%- assign compact = true -%}{%- assign show_org = false -%}{%- assign cap = 11 -%}
+  {%- comment -%} three columns: the price column only fits on large screens {%- endcomment -%}
+  {%- assign compact = true -%}{%- assign org_class = "hidden" -%}{%- assign cap = 11 -%}{%- assign price_class = "hidden lg:table-cell" -%}
 {%- else -%}
-  {%- assign compact = false -%}{%- assign show_org = true -%}{%- assign cap = 12 -%}
+  {%- assign compact = false -%}{%- assign cap = 12 -%}{%- assign price_class = "" -%}
+  {%- assign prices_on = cf.show_prices | default: "yes" | downcase -%}
+  {%- if prices_on == "no" -%}{%- assign org_class = "" -%}{%- else -%}{%- assign org_class = "hidden lg:inline" -%}{%- endif -%}
 {%- endif -%}
 {%- if error != "" -%}
 <div class="layout layout--col layout--center">
@@ -18,7 +21,7 @@
 {%- else -%}
 <div class="layout layout--row layout--stretch gap--large portrait:flex--col">
   {%- for b in boards -%}
-    {% render 'board', board: b, n: max_models, cap: cap, compact: compact, hl: hl, hl_size: hl_size, show_org: show_org, table_class: "table--small", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models %}
+    {% render 'board', board: b, n: max_models, cap: cap, compact: compact, price_class: price_class, hl: hl, hl_size: hl_size, org_class: org_class, table_class: "table--small", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
   {%- endfor -%}
 </div>
 {%- endif -%}

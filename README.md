@@ -11,7 +11,7 @@ Available leaderboards:
 | [LiveBench](https://livebench.ai) | Overall, Reasoning, Coding, Agentic Coding, Mathematics | Score computed like the official table (mean of the category averages) |
 | [Artificial Analysis](https://artificialanalysis.ai) | Intelligence, Coding and Agentic indices | Needs a free API key (100 requests per day) |
 
-Each leaderboard shows rank, model, organisation, score, and the source with the date of its latest data. Models matching the "Highlight" words are inverted, and an "open-weights only" switch keeps the open models with their real ranks. All four TRMNL screen formats are supported (full, both halves, quadrant for mashups). On-screen labels are available in English and French, auto-detected from the TRMNL account language or forced in the settings.
+Each leaderboard shows rank, model, organisation, score, price, and the source with the date of its latest data. The price is in dollars per million tokens, input/output, taken from [OpenRouter](https://openrouter.ai/models) (from Artificial Analysis on its own leaderboards) and matched by model name. Models released in the last two weeks are marked "new". Models matching the "Highlight" words are inverted, and an "open-weights only" switch keeps the open models with their real ranks. All four TRMNL screen formats are supported (full, both halves, quadrant for mashups). On-screen labels are available in English and French, auto-detected from the TRMNL account language or forced in the settings.
 
 ![Full screen with two leaderboards](docs/screenshots/full.png)
 
@@ -39,6 +39,7 @@ Then open the plugin on trmnl.com and fill in the fields:
 | Leaderboard 1, 2, 3 | Which leaderboards to show. The first one is on every layout, the second joins it on the full and half layouts, the third only on the full layout |
 | Models per leaderboard | Rows on the full layout, 1 to 15. The TRMNL OG fits 12 (11 with three leaderboards), the TRMNL X shows them all; the half and quadrant layouts show 5 rows on the OG and up to 8 on the X |
 | Open-weights models only | Keeps open-weights models where the source says which ones are (Arena, Epoch AI) |
+| Show prices | Price column and "new" badges (default on). With three leaderboards the price column only fits on the TRMNL X |
 | Highlight | Comma-separated words, e.g. `claude, mistral`: matching models are shown inverted |
 | Screen title | Empty = "LLM Leaderboards" |
 | Artificial Analysis API key | Only for the Artificial Analysis leaderboards |
@@ -94,6 +95,9 @@ On every refresh, TRMNL polls a 50-byte pointer to the latest Arena snapshot, th
 | Epoch benchmark tables | `https://epoch.ai/data/benchmark_data.zip`, 2.3 MB, read once per run; the table, `benchmark_metadata.csv` (score column and scale) and `model_metadata.csv` (display names, organisations, open weights) are taken from it |
 | LiveBench | `table_<version>.csv` and `categories_<version>.json` on livebench.ai |
 | Artificial Analysis | `/api/v2/language/models/free` with the `x-api-key` header, one or two pages |
+| OpenRouter | `/api/v1/models`, 730 KB, no key, once per run when prices are on: prices per million tokens and the date each model was listed |
+
+Prices are matched by normalised model name: vendor prefixes, dates and run variants such as `-high`, `(xHigh)` or `-max-effort` are ignored, so `claude-opus-4-6-high` on Arena, `Claude Opus 4.6` at Epoch and `Anthropic: Claude Opus 4.6` on OpenRouter are the same model. About nine models out of ten get a price; the others show none. The "new" badge uses the release date from Epoch AI or Artificial Analysis, or the OpenRouter listing date for Arena and LiveBench.
 
 It returns one `boards` entry per leaderboard with at most 15 rows, which keeps the merge variables far below TRMNL's 100 KB cap. A leaderboard that cannot be loaded shows its own error message; the others still render. The function gives itself 4 seconds of network time out of TRMNL's 5 second limit, and every fetch has a timeout.
 
@@ -103,7 +107,7 @@ Finally the Liquid views render the boards: `shared.liquid` defines a `board` te
 
 ## Attribution
 
-Please keep the source names on screen: Epoch AI's data is CC BY 4.0, and Artificial Analysis requires attribution for API data. Arena data comes from arena.ai through the [arena-ai-leaderboards](https://github.com/oolong-tea-2026/arena-ai-leaderboards) mirror (MIT), LiveBench data from [livebench.ai](https://livebench.ai).
+Please keep the source names on screen: Epoch AI's data is CC BY 4.0, and Artificial Analysis requires attribution for API data. Arena data comes from arena.ai through the [arena-ai-leaderboards](https://github.com/oolong-tea-2026/arena-ai-leaderboards) mirror (MIT), LiveBench data from [livebench.ai](https://livebench.ai), prices from [OpenRouter](https://openrouter.ai).
 
 ## Known limits
 
@@ -112,3 +116,4 @@ Please keep the source names on screen: Epoch AI's data is CC BY 4.0, and Artifi
 - LiveBench does not expose its current version in a stable file: the version is hard-coded in `src/transform.py` and can be overridden with the "LiveBench version" field.
 - The Artificial Analysis boards are untested against the live API: the function follows the documented free-tier response, and shows the HTTP status if the key is refused.
 - Open-weights filtering only applies where the source publishes a licence (Arena, Epoch AI); LiveBench and the Artificial Analysis free tier do not.
+- Prices are OpenRouter's listed price for the model, which may differ from the vendor's, and a name match can pick a sibling (a preview build, a different reasoning tier at the same price). A brand-new model appears on a leaderboard only once it has been evaluated: within days at Epoch AI and Artificial Analysis, after enough votes on Arena, and at the next release for LiveBench.

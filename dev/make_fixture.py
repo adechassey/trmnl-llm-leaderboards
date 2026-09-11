@@ -26,6 +26,7 @@ DEFAULT_FIELDS = {
     "board_3": "none",
     "max_models": "10",
     "open_weights_only": "no",
+    "show_prices": "yes",
     "highlight": "",
     "title": "",
     "aa_api_key": "",
@@ -54,11 +55,16 @@ def build_sources():
     for f in sorted((SAMPLES / "livebench").iterdir()):
         sources[tf.LIVEBENCH + f.name] = f.read_text(encoding="utf-8")
     sources[tf.AA_MODELS] = (SAMPLES / "artificialanalysis" / "models_free.synthetic.json").read_text(encoding="utf-8")
+    openrouter = SAMPLES / "openrouter" / "models.json"
+    if openrouter.exists():  # written last by dev/fetch_samples.py
+        sources[tf.OPENROUTER_MODELS] = openrouter.read_text(encoding="utf-8")
     return sources
 
 
 def build_variables(sources=None, offline=True):
-    return {**FROZEN_CLOCK, "offline": offline, "sources": sources if sources is not None else build_sources()}
+    """`now` freezes the function's clock (for the "new" badges) like trmnl.system does the views'."""
+    return {**FROZEN_CLOCK, "now": int(NOW.timestamp()), "offline": offline,
+            "sources": sources if sources is not None else build_sources()}
 
 
 def render_config(custom_fields, variables, watch=("../../src", ".trmnlp.yml"), comment=""):

@@ -14,7 +14,7 @@
     - lang, t_*     : on-screen language (en / fr) and the translated labels
 
   Fields read by the Serverless function rather than by the markup: board_1, board_2,
-  board_3, open_weights_only, aa_api_key, livebench_version (see src/transform.py).
+  board_3, open_weights_only, show_prices, aa_api_key, livebench_version (see src/transform.py).
 {%- endcomment -%}
 
 
@@ -27,10 +27,15 @@
 {% endtemplate %}
 
 {%- comment -%}
-  One leaderboard: title, source and date, then a rank / model / score table.
+  One leaderboard: title, source and date, then a rank / model / score table, plus a price
+  column ($ per million tokens, input/output) when the function found prices and a "new"
+  badge on models released in the last two weeks.
   Arguments: board, n (rows), cap (rows visible on the OG; rows cap+1..n only show on large
-  screens), compact (source line under the title, for narrow columns), hl + hl_size
-  (highlight words), show_org, table_class, date_fmt, t_model, t_no_models.
+  screens), compact (source line under the title, for narrow columns), price_class (extra
+  classes of the price cells, e.g. "hidden lg:table-cell" to keep them for large screens),
+  hl + hl_size (highlight words), org_class ("" = organisation after the model name,
+  "hidden lg:inline" = large screens only, "hidden" = never), table_class, date_fmt,
+  t_model, t_no_models, t_price, t_new.
 {%- endcomment -%}
 {% template board %}
 <div class="flex flex--col stretch-x">
@@ -56,6 +61,7 @@
         <th class="w--8"><span class="title title--small">#</span></th>
         <th><span class="title title--small">{{ t_model }}</span></th>
         <th class="w--16 text--right"><span class="title title--small">{{ board.unit }}</span></th>
+        {%- if board.has_price -%}<th class="w--20 text--right {{ price_class }}"><span class="title title--small">{{ t_price }}</span></th>{%- endif -%}
       </tr>
     </thead>
     <tbody>
@@ -70,9 +76,11 @@
           <td class="w--8"><span class="label label--small">{{ r.rank }}</span></td>
           <td>
             <span class="label label--small{% if hit %} label--filled{% endif %}">{{ r.model }}</span>
-            {%- if show_org and r.org != blank %} <span class="label label--small label--gray-out">{{ r.org }}</span>{%- endif -%}
+            {%- if org_class != "hidden" and r.org != blank %} <span class="label label--small label--gray-out {{ org_class }}">{{ r.org }}</span>{%- endif -%}
+            {%- if r.new %} <span class="label label--small label--underline">{{ t_new }}</span>{%- endif -%}
           </td>
           <td class="w--16 text--right"><span class="value value--xxsmall value--tnums">{{ r.score }}</span></td>
+          {%- if board.has_price -%}<td class="w--20 text--right {{ price_class }}"><span class="label label--small">{{ r.price }}</span></td>{%- endif -%}
         </tr>
       {%- endfor -%}
     </tbody>
@@ -120,6 +128,8 @@
   {%- assign t_updated = "Mis à jour" -%}
   {%- assign t_unavailable = "Données indisponibles" -%}
   {%- assign t_no_data = "Pas de données : la fonction Serverless du plugin n'a pas répondu." -%}
+  {%- assign t_price = "$/1M" -%}
+  {%- assign t_new = "nouveau" -%}
   {%- assign date_fmt = "%-d %b" -%}
 {%- else -%}
   {%- assign lang = "en" -%}
@@ -129,6 +139,8 @@
   {%- assign t_updated = "Updated" -%}
   {%- assign t_unavailable = "Data unavailable" -%}
   {%- assign t_no_data = "No data: the plugin's Serverless function did not respond." -%}
+  {%- assign t_price = "$/1M" -%}
+  {%- assign t_new = "new" -%}
   {%- assign date_fmt = "%b %-d" -%}
 {%- endif -%}
 

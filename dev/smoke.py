@@ -27,8 +27,15 @@ CASES = {
     "default": (
         {}, ONLINE,
         ["Arena Text", "arena.ai", "Sep 2", "claude-fable-5", "Anthropic", "1507",
-         "Epoch Capabilities Index", "epoch.ai", "GPT-6 Astra", "166.6", "Elo", "ECI", "LLM Leaderboards", "Updated 14:00"],
-        ["Data unavailable", "Google DeepMind"], 20),
+         "Epoch Capabilities Index", "epoch.ai", "GPT-6 Astra", "166.6", "Elo", "ECI", "LLM Leaderboards", "Updated 14:00",
+         "$/1M", "10/50", "5/25", "GPT-6 Astra OpenAI new"],
+        ["Data unavailable", "Google DeepMind", "Claude Fable 5 Anthropic new"], 20),
+    "no_prices": (
+        {"show_prices": "no"}, ONLINE,
+        ["Arena Text", "1507", "GPT-6 Astra OpenAI new"], ["$/1M", "10/50"], 20),
+    "prices_source_down": (
+        {}, {**ONLINE, "sources": {k: v for k, v in SOURCES.items() if "openrouter" not in k}},
+        ["Arena Text", "1507", "Epoch Capabilities Index", "GPT-6 Astra OpenAI new"], ["$/1M", "10/50", "claude-fable-5 Anthropic new"], 20),
     "three_boards": (
         {"board_3": "epoch_gpqa"}, ONLINE,
         ["Arena Text", "Epoch Capabilities Index", "GPQA Diamond", "95.8"], ["Data unavailable"], 30),
@@ -46,7 +53,8 @@ CASES = {
         ["AA Intelligence", "Artificial Analysis API key", "Arena Code", "gpt-6-astra-max", "1796"], ["Data unavailable"], 10),
     "aa_with_key": (
         {"board_1": "aa_intelligence", "board_2": "aa_coding", "aa_api_key": "test-key", "max_models": "5"}, ONLINE,
-        ["AA Intelligence", "artificialanalysis.ai", "Sample Model A (max)", "78.4", "AA Coding", "Sample Model B (xhigh)", "73.5", "Index"],
+        ["AA Intelligence", "artificialanalysis.ai", "Sample Model A (max)", "78.4", "AA Coding", "Sample Model B (xhigh)", "73.5", "Index",
+         "$/1M", "10/50", "8/40", "Sample Model B (xhigh) Example AI new"],
         ["Data unavailable", "Sample Legacy"], 10),
     "open_weights": (
         {"open_weights_only": "yes", "board_1": "epoch_eci", "board_2": "arena_text"}, ONLINE,
@@ -60,7 +68,7 @@ CASES = {
         {"title": "Frontier models"}, ONLINE, ["Frontier models"], ["LLM Leaderboards"], 20),
     "lang_fr": (
         {"language": "fr"}, ONLINE,
-        ["Classements LLM", "Modèle", "Mis à jour 14:00", "2 Sep"], ["Model", "Updated"], 20),
+        ["Classements LLM", "Modèle", "Mis à jour 14:00", "2 Sep", "nouveau"], ["Model", "Updated", " new "], 20),
     "lang_auto_fr_locale": (
         {"language": "auto"}, {**ONLINE, "trmnl": {**ONLINE["trmnl"], "user": {"locale": "fr-FR"}}},
         ["Classements LLM", "Modèle"], ["Model"], 20),

@@ -91,6 +91,21 @@ If TRMNL does not recognise the `text/plain` JSON, the function fetches the poin
 - Without a key the endpoint answers `401 {"error":"API key is required"}` (verified).
 - The older path `/api/v2/data/llms/models` still appears in the API reference.
 
+### OpenRouter (prices and listing dates, no key)
+
+- `https://openrouter.ai/api/v1/models`: 733 KB, 0.2 s, 443 models on 2026-09-11. Fields used:
+  `name` ("Anthropic: Claude Opus 4.6"), `id` ("anthropic/claude-opus-4.6"), `created` (epoch
+  seconds, the day the model was listed), `pricing.prompt` / `pricing.completion` ($ per token,
+  strings). Entries with `alias_target` (rolling aliases) and `:free` ids are skipped.
+- Matching by normalised name (lowercase, vendor prefix, parentheses, dates and variant tokens
+  such as high/xhigh/max/thinking/effort/preview removed): 91 of 96 rows across 8 boards
+  matched on 2026-09-11. Misses: models absent from OpenRouter (`smaug-agentic`,
+  `qwen3.8-flash-next`) and Gemini "Pro" entries listed as "Preview" with a different suffix.
+- Alternatives considered: BenchLM (inputPrice/outputPrice, but 3 s delay and estimated data),
+  Artificial Analysis (accurate, but a key is required; used for its own boards), LiteLLM's
+  `model_prices_and_context_window.json` on GitHub (1.5 MB, keyed by API ids that differ per
+  provider, harder to match).
+
 ## 4. Rejected sources
 
 | Source | Verdict | Reason |
