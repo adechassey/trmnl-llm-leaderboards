@@ -60,6 +60,7 @@ The default refresh is every 6 hours: the sources change at most daily.
 
 ```sh
 bin/dev fixture               # preview at http://localhost:4567 with offline samples
+bin/dev fixture board_3=epoch_gpqa max_models=10   # same, with other plugin field values
 bin/dev                       # preview with live data (add AA_API_KEY=... to .env for Artificial Analysis)
 bin/trmnlp lint               # TRMNL best practices
 python3 dev/smoke.py          # renders every view in many configurations and checks the output
@@ -67,7 +68,7 @@ python3 dev/fetch_samples.py  # refreshes dev/samples from the live sources
 python3 dev/make_fixture.py   # rebuilds dev/fixture/.trmnlp.yml from dev/samples
 ```
 
-`fixture` mode uses `dev/fixture/.trmnlp.yml`: the real snapshots of `dev/samples/` (trimmed to their best rows) injected as `sources`, with `offline: true` so the function never reaches the network, and a clock frozen at 14:00. The Artificial Analysis sample is synthetic, shaped like the documented API response.
+`fixture` mode rebuilds `dev/fixture/.trmnlp.yml` on every start: the real snapshots of `dev/samples/` (trimmed to their best 40 rows) injected as `sources`, with `offline: true` so the function never reaches the network, and a clock frozen at 14:00. The Artificial Analysis sample is synthetic, shaped like the documented API response. Set the plugin fields with `field=value` arguments rather than with the preview's Custom Fields editor: trmnlp 0.12 cannot save select fields whose options are `Label: value` pairs (the format TRMNL uses for labelled options) and writes `[object Object]` instead.
 
 Keep an Artificial Analysis key in `.env`, never in `.trmnlp.yml`: that file is committed by TRMNL's GitHub sync with empty custom fields. To use your own local values without ever committing them:
 

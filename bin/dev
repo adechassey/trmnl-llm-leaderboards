@@ -2,7 +2,9 @@
 #
 # Local preview of the plugin.
 #   bin/dev            -> live data (the Serverless function fetches the leaderboards)
-#   bin/dev fixture    -> offline sample data from dev/samples, no network
+#   bin/dev fixture    -> offline sample data from dev/samples, no network. The fixture config
+#                         is rebuilt on every start; field=value arguments set the plugin
+#                         fields, e.g. bin/dev fixture board_3=epoch_gpqa max_models=10
 # Extra options are passed to `trmnlp serve` (e.g. --port 5000).
 #
 set -euo pipefail
@@ -21,7 +23,18 @@ fi
 
 if [ "${1:-}" = "fixture" ]; then
   shift
-  exec bin/trmnlp serve --dir dev/fixture "$@"
+  # field=value arguments go to the fixture generator, the rest to trmnlp serve
+  fields=(); serve=()
+  for arg in "$@"; do
+    case "$arg" in
+      -*) serve+=("$arg") ;;
+      *=*) fields+=("$arg") ;;
+      *) serve+=("$arg") ;;
+    esac
+  done
+  # (the ${array[@]+...} form keeps `set -u` happy with empty arrays on macOS bash 3.2)
+  python3 dev/make_fixture.py ${fields[@]+"${fields[@]}"}
+  exec bin/trmnlp serve --dir dev/fixture ${serve[@]+"${serve[@]}"}
 fi
 
 if [ ! -f .trmnlp.yml ]; then
