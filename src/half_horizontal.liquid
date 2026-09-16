@@ -1,9 +1,13 @@
 {%- comment -%}
-  Horizontal half (800x240): the first two leaderboards side by side, 5 rows each on the OG,
-  up to 8 on large screens.
+  Horizontal half (800x240 on the OG, 1040x390 on the TRMNL X, 780x520 in portrait): the first
+  two leaderboards side by side, as many rows as fit, with a short header (source and date).
+  A single leaderboard gets the whole width and spreads its rows over two columns.
 {%- endcomment -%}
-{%- assign n = max_models -%}
-{%- if n > 8 -%}{%- assign n = 8 -%}{%- endif -%}
+{%- if boards.size > 1 -%}
+  {%- assign cols = 1 -%}
+{%- else -%}
+  {%- assign cols = 2 -%}
+{%- endif -%}
 {%- if error != "" -%}
 <div class="layout layout--col layout--center">
   <span class="title title--small">{{ t_unavailable }}</span>
@@ -12,7 +16,7 @@
 {%- else -%}
 <div class="layout layout--row layout--stretch gap--large">
   {%- for b in boards limit: 2 -%}
-    {% render 'board', board: b, n: n, cap: 5, compact: false, price_class: "", hl: hl, hl_size: hl_size, org_class: "hidden", table_class: "table--xsmall", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
+    {% render 'board', board: b, cols: cols, cols_lg: cols, cols_lg_portrait: cols, board_class: "", compact: false, short_header: true, price_lg_only: false, org_class: "hidden lg:inline lg:portrait:hidden", hl: hl, hl_size: hl_size, date_fmt: date_fmt, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
   {%- endfor -%}
 </div>
 {%- endif -%}

@@ -121,7 +121,7 @@ If TRMNL does not recognise the `text/plain` JSON, the function fetches the poin
 
 ## 5. TRMNL constraints kept in mind
 
-- Merge data cap 100 KB: a board is ~1 KB per 10 rows.
+- Merge data cap 100 KB: a board is ~1 KB per 10 rows, so 3 boards of 60 rows are ~20 KB.
 - Serverless: Python, 5 s, 128 MB, network access included (`requests` preinstalled; the function
   uses `urllib` from the standard library so it also runs unchanged under trmnlp).
 - `trmnlp` quirk: `{{ env.X }}` is only rendered in polling URL/headers/body, not in the field
@@ -129,24 +129,61 @@ If TRMNL does not recognise the `text/plain` JSON, the function fetches the poin
 - Chef hints: no inline styles, no `<style>`, no HTTP in the function (see §2). Layouts use
   framework classes only; the outermost node of every view is the `layout` element.
 - Framework classes used (checked in `https://trmnl.com/css/latest/plugins.css`): `layout--row`,
-  `layout--stretch-x`, `gap--large`, `portrait:flex--col`, `flex--between`, `flex--bottom`,
-  `table--small`, `w--8`, `w--16`, `text--right`, `label--filled`, `label--gray` (same rule as
-  the older `label--gray-out`), `label--underline`, `value--xxsmall`, `value--tnums`.
-  `label--xsmall` and `title--xsmall` do not exist. `layout--stretch > *` already gives the
-  children `flex: 1 1 0%`, so a `stretch-x` on them is redundant (Chef's review, 2026-09-11).
+  `layout--col`, `layout--stretch`, `portrait:layout--col`, `gap--large`, `gap--small`,
+  `gap--xsmall`, `flex--between`, `flex--bottom`, `flex--center-y`, `grow`,
+  `shrink-0`, `w--full`, `w--5`, `lg:w--7`, `w--16`, `lg:w--20`, `h--full`, `h--[48cqh]`, `portrait:h--[32cqh]`,
+  `text--right`, `hidden`, `lg:inline`, `lg:block`, `lg:hidden`, `lg:portrait:hidden`,
+  `columns`, `column`, `item`, `content`, `label--filled`, `label--gray`,
+  `label--underline`, `lg:label--base`, `lg:title--base`, `lg:portrait:title--small`,
+  `value--xxsmall`, `lg:value--xsmall`, `value--tnums`, `text--bold`. `label--xsmall` and `title--xsmall`
+  do not exist. `layout--stretch > *` already gives the children `flex: 1 1 0%`, so a
+  `stretch-x` on them is redundant (Chef's review, 2026-09-11).
 - `{% template %}` partials take explicit arguments with `{% render %}`; loops inside work.
-- The framework's table overflow engine (`data-table-limit="true"`, in `plugins.js`) hides
-  rows beyond `table.parentElement.clientHeight` minus the `thead` height. Inside a board
-  column that height is the content height, so nothing is hidden: each layout caps the rows
-  in Liquid instead (measured on the OG: 12 rows per board on the full layout, 11 when the
-  three-board header wraps to two lines, 5 rows on the half and quadrant layouts) and gives
-  the extra rows `hidden lg:table-row`, so the TRMNL X shows up to 15 / 8. `layout--top`
-  leaves short content top-aligned but the columns unstretched; `layout--stretch` stretches
-  them and their `flex--col` content still starts at the top.
+- Rows are framework `item`s in a `columns` container with `data-overflow-max-cols` (base,
+  `-lg`, `-lg-portrait`): the Overflow engine (`plugins.js`) measures the items, hides those
+  that exceed the container's height budget and, when the board is wide enough, spreads them
+  over up to N columns (best fit: the plan showing the most rows). Findings while adopting it
+  (framework 3.3, 2026-09-16, review by Mario at TRMNL: "wasted space on TRMNL X, use smart
+  columns and `lg:` sizes"):
+  - The budget is the parent's content box below the `columns` element, minus the height of
+    every following sibling (the engine assumes a vertical flow). So each board is wrapped in
+    its own `flex flex--col` (header, then the `columns` as last child) and the wrappers are
+    the `layout--stretch` children: side by side they are stretched to the layout height.
+  - Stacked (`layout--col`: half vertical, full in portrait), a wrapper is a flex item on the
+    main axis and `min-height: auto` keeps it as tall as its rows, so nothing is hidden and
+    the layout is cut. An explicit height fixes it: `h--full` for one board, `h--[48cqh]` /
+    `h--[32cqh]` for two / three (container-query units relative to the layout, which is a
+    `container-type: size`). With `flex: 1 1 0%` the boards then share the height equally.
+  - The engine measures in staging columns that are plain `.column` elements: a gap class on
+    the real `.column` is ignored there and the plan ends two rows short. Keep the default
+    column gap.
+  - The previous approach, a `table` with `data-table-limit`, had no usable budget inside a
+    board (parent height = content height) and needed Liquid row caps per layout and screen
+    (`hidden lg:table-row`), i.e. the artificial limits the review objected to.
+  - Group headers (`data-group-header` labels) are duplicated as text-only gray labels in the
+    next column, so a multi-cell column head cannot be a group header; the unit and the price
+    legend moved to the board's header line instead, and `%` / `h` scores carry their unit.
+  - Flex children get `min-width: 0` from the framework: the score and price cells need
+    `shrink-0`, otherwise a long model name squeezes the number onto its neighbour.
+  - `.column` has `justify-content: center` and `.flex--col` has `align-items: center`:
+    give full-width children `w--full`.
+  - The item's `.meta` bar with an `.index` is 10 px wide: two-digit ranks overflow it (and
+    look cramped on the X), so the rows are simple items with the rank as a bold,
+    right-aligned label (`text--bold`) in a `w--5 lg:w--7` cell. An outlined badge
+    (`label--outline`) was tried and rejected: boxy, and 1 px taller than the score.
+- Sizes: OG `label--small` (12 px) rows and `value--xxsmall` scores, TRMNL X `lg:label--base`
+  (16 px), `lg:value--xsmall` (20 px), `lg:title--base` board titles; in the narrow mashup
+  slots in portrait `lg:portrait:title--small`. The organisation is shown only where a row
+  has the width (TRMNL X, landscape, one or two boards): `hidden lg:inline lg:portrait:hidden`.
+- Device classes seen by the views (trmnl.com/api/models): TRMNL OG `screen--md screen--1bit`
+  800x480; TRMNL X (`v2`) `screen--lg screen--4bit screen--density-2x`, 1040x780 CSS px
+  (1872x1404 physical, scale 1.8), `screen--portrait` swaps the two. trmnlp renders any of
+  them with `/render/<view>.html?screen_classes=...&width=...&height=...`.
 
 ## 6. Ideas not done
 
 - A `latest/` directory in the Arena mirror (pull request upstream) would remove the pointer chain.
-- TRMNL X (`lg:`) could show more rows in the quadrant and half layouts.
+- The Overflow engine fills columns in order (the first column full, the rest in the
+  second): a single Arena board (20 rows in the mirror) leaves the second column short.
 - More Epoch tables are one line away in `BOARDS` (Vending-Bench 2, GDPval, Cybench, SciCode,
   WebDev Arena...).

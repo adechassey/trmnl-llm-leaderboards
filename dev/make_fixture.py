@@ -24,7 +24,7 @@ DEFAULT_FIELDS = {
     "board_1": "arena_text",
     "board_2": "epoch_eci",
     "board_3": "none",
-    "max_models": "10",
+    "max_models": "",
     "open_weights_only": "no",
     "show_prices": "yes",
     "highlight": "",

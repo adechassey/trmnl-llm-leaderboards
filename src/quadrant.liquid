@@ -1,18 +1,15 @@
 {%- comment -%}
-  Quadrant (400x240 on the OG, twice that on TRMNL X): the first leaderboard only, 5 rows on
-  the OG and up to 8 on large screens.
+  Quadrant (400x240 on the OG, 520x390 on the TRMNL X, 390x520 in portrait): the first
+  leaderboard only, as many rows as fit, with a short header (source and date).
 {%- endcomment -%}
-{%- assign n = max_models -%}
-{%- if n > 8 -%}{%- assign n = 8 -%}{%- endif -%}
 {%- if error != "" -%}
 <div class="layout layout--col layout--center">
   <span class="title title--small">{{ t_unavailable }}</span>
   <span class="label label--small">{{ error }}</span>
 </div>
 {%- else -%}
-<div class="layout layout--col layout--top layout--stretch-x">
-  {%- assign b = boards[0] -%}
-  {% render 'board', board: b, n: n, cap: 5, compact: false, price_class: "", hl: hl, hl_size: hl_size, org_class: "hidden", table_class: "table--xsmall", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
+<div class="layout layout--col layout--stretch">
+  {% render 'board', board: boards[0], cols: 1, cols_lg: 1, cols_lg_portrait: 1, board_class: "h--full", compact: false, short_header: true, price_lg_only: false, org_class: "hidden lg:inline lg:portrait:hidden", hl: hl, hl_size: hl_size, date_fmt: date_fmt, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
 </div>
 {%- endif -%}
 

@@ -11,11 +11,15 @@ Available leaderboards:
 | [LiveBench](https://livebench.ai) | Overall, Reasoning, Coding, Agentic Coding, Mathematics | Score computed like the official table (mean of the category averages) |
 | [Artificial Analysis](https://artificialanalysis.ai) | Intelligence, Coding and Agentic indices | Needs a free API key (100 requests per day). One row per model, best reasoning setting |
 
-Each leaderboard shows rank, model, organisation, score, price, and the source with the date of its latest data. The price column reads `10/50` for $10 per million input tokens and $50 per million output tokens; it comes from [OpenRouter](https://openrouter.ai/models) (from Artificial Analysis on its own leaderboards) and is matched by model name. Models released in the last two weeks are marked "new". Models matching the "Highlight" words are inverted, and an "open-weights only" switch keeps the open models with their real ranks. All four TRMNL screen formats are supported (full, both halves, quadrant for mashups). On-screen labels are available in English and French, auto-detected from the TRMNL account language or forced in the settings.
+Each leaderboard shows rank, model, organisation, score, price, and the source with the date of its latest data. The price column reads `10/50` for $10 per million input tokens and $50 per million output tokens; it comes from [OpenRouter](https://openrouter.ai/models) (from Artificial Analysis on its own leaderboards) and is matched by model name. Models released in the last two weeks are marked "new". Models matching the "Highlight" words are inverted, and an "open-weights only" switch keeps the open models with their real ranks. All four TRMNL screen formats are supported (full, both halves, quadrant for mashups), on the TRMNL OG and on the TRMNL X in landscape and portrait: a leaderboard shows as many rows as fit its space and, when it has the width, spreads them over two columns. On-screen labels are available in English and French, auto-detected from the TRMNL account language or forced in the settings.
 
 ![Full screen with two leaderboards](docs/screenshots/full.png)
 
 ![Full screen with three leaderboards and highlighted models](docs/screenshots/full_three_boards.png)
+
+![TRMNL X, two leaderboards](docs/screenshots/trmnl_x_full.png)
+
+![TRMNL X in portrait, two leaderboards on two columns each](docs/screenshots/trmnl_x_portrait_full.png)
 
 ## Prerequisites
 
@@ -37,9 +41,9 @@ Then open the plugin on trmnl.com and fill in the fields:
 | Field | Purpose |
 |---|---|
 | Leaderboard 1, 2, 3 | Which leaderboards to show. The first one is on every layout, the second joins it on the full and half layouts, the third only on the full layout |
-| Models per leaderboard | Rows on the full layout, 1 to 15. The TRMNL OG fits 12 (11 with three leaderboards), the TRMNL X shows them all; the half and quadrant layouts show 5 rows on the OG and up to 8 on the X |
+| Models per leaderboard | Empty = as many rows as fit on the screen (up to 60 per leaderboard). Set a number to stop earlier, e.g. 10 for a top 10 |
 | Open-weights models only | Keeps open-weights models where the source says which ones are (Arena, Epoch AI) |
-| Show prices | Price column and "new" badges (default on). With three leaderboards the price column only fits on the TRMNL X |
+| Show prices | Price column and "new" badges (default on). With three leaderboards the price column only fits on the TRMNL X; the organisation after the model name only fits on the TRMNL X in landscape |
 | Highlight | Comma-separated words, e.g. `claude, mistral`: matching models are shown inverted |
 | Screen title | Empty = "LLM Leaderboards" |
 | Artificial Analysis API key | Only for the Artificial Analysis leaderboards |
@@ -77,7 +81,7 @@ git update-index --skip-worktree .trmnlp.yml
 |---|---|
 | `src/settings.yml` | Plugin config: polling URL, form fields, Serverless language |
 | `src/transform.py` | Serverless function: fetches the selected leaderboards, normalises and ranks them |
-| `src/shared.liquid` | Prepended to every view: the `board` and `title_bar` templates, EN/FR labels |
+| `src/shared.liquid` | Prepended to every view: the `board` (header + one `item` per row, Overflow columns) and `title_bar` templates, EN/FR labels |
 | `src/full.liquid` | Full screen, 800×480, up to three leaderboards side by side |
 | `src/half_horizontal.liquid`, `src/half_vertical.liquid`, `src/quadrant.liquid` | Mashup formats |
 | `assets/` | Plugin icon (SVG and 512×512 PNG) |
@@ -99,11 +103,11 @@ On every refresh, TRMNL polls a 50-byte pointer to the latest Arena snapshot, th
 
 Prices are matched by normalised model name: vendor prefixes, dates and run variants such as `-high`, `(xHigh)` or `-max-effort` are ignored, so `claude-opus-4-6-high` on Arena, `Claude Opus 4.6` at Epoch and `Anthropic: Claude Opus 4.6` on OpenRouter are the same model. About nine models out of ten get a price; the others show none. The "new" badge uses the release date from Epoch AI or Artificial Analysis, or the OpenRouter listing date for Arena and LiveBench.
 
-It returns one `boards` entry per leaderboard with at most 15 rows, which keeps the merge variables far below TRMNL's 100 KB cap. A leaderboard that cannot be loaded shows its own error message; the others still render. The function gives itself 4 seconds of network time out of TRMNL's 5 second limit, and every fetch has a timeout.
+It returns one `boards` entry per leaderboard with at most 60 rows (or the "Models per leaderboard" value), about 20 KB for three leaderboards, far below TRMNL's 100 KB cap on merge variables. A leaderboard that cannot be loaded shows its own error message; the others still render. The function gives itself 4 seconds of network time out of TRMNL's 5 second limit, and every fetch has a timeout.
 
 Why the function fetches instead of TRMNL polling everything: the Arena snapshot lives at a dated path that only the pointer knows, the Epoch tables are inside a zip, and only the selected leaderboards should be downloaded. TRMNL's publishing checker (Chef) flags HTTP calls in Serverless functions as a hint; the calls here are few and small. Details in `docs/research.md`.
 
-Finally the Liquid views render the boards: `shared.liquid` defines a `board` template used by every layout, so a layout only decides how many boards and rows it shows.
+Finally the Liquid views render the boards: `shared.liquid` defines a `board` template used by every layout, so a layout only decides how many boards it shows, how they are arranged and how many columns a board may use. A board is a header line and one framework `item` per row inside a `columns` container; the framework's Overflow engine measures the rows at render time, hides the ones that do not fit the board's height and splits them over two columns where the board is wide enough (a single leaderboard on any screen, every leaderboard on the TRMNL X in portrait). Text steps up one size on the TRMNL X (`lg:` classes).
 
 ## Attribution
 

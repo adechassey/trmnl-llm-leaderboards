@@ -136,11 +136,10 @@ custom_fields:
 - keyname: max_models
   field_type: number
   name: Models per leaderboard
-  description: Rows on the full layout (1 to 15).
-  help_text: The TRMNL OG fits 12 rows (11 with three leaderboards), the TRMNL X shows them all. The half and quadrant layouts show 5 rows on the OG and up to 8 on the X, and hide rows that do not fit.
-  default: 10
+  description: Empty = as many as fit on the screen. Set a number (1 to 60) to stop earlier, e.g. 10 for a top 10.
+  help_text: Rows that do not fit are hidden automatically. The TRMNL X shows a leaderboard on two columns when it has the width (one leaderboard in landscape, every leaderboard in portrait).
   min: 1
-  max: 15
+  max: 60
   optional: true
 - keyname: open_weights_only
   field_type: select

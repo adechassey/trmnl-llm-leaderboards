@@ -1,13 +1,13 @@
 {%- comment -%}
-  Vertical half (400x480): the first two leaderboards stacked, 5 rows each on the OG and up
-  to 8 on large screens. A single leaderboard gets the whole height: 12 rows on the OG.
+  Vertical half (400x480 on the OG, 520x780 on the TRMNL X, 390x1040 in portrait): the first
+  two leaderboards stacked, half the height each (the explicit height lets the flex column
+  shrink a board below its content), as many rows as fit, with a short header (source and
+  date). A single leaderboard gets the whole height.
 {%- endcomment -%}
-{%- assign n = max_models -%}
 {%- if boards.size > 1 -%}
-  {%- assign cap = 5 -%}
-  {%- if n > 8 -%}{%- assign n = 8 -%}{%- endif -%}
+  {%- assign board_class = "h--[48cqh]" -%}
 {%- else -%}
-  {%- assign cap = 12 -%}
+  {%- assign board_class = "h--full" -%}
 {%- endif -%}
 {%- if error != "" -%}
 <div class="layout layout--col layout--center">
@@ -15,9 +15,9 @@
   <span class="label label--small">{{ error }}</span>
 </div>
 {%- else -%}
-<div class="layout layout--col layout--top layout--stretch-x gap--medium">
+<div class="layout layout--col layout--stretch">
   {%- for b in boards limit: 2 -%}
-    {% render 'board', board: b, n: n, cap: cap, compact: false, price_class: "", hl: hl, hl_size: hl_size, org_class: "hidden", table_class: "table--xsmall", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
+    {% render 'board', board: b, cols: 1, cols_lg: 1, cols_lg_portrait: 1, board_class: board_class, compact: false, short_header: true, price_lg_only: false, org_class: "hidden lg:inline lg:portrait:hidden", hl: hl, hl_size: hl_size, date_fmt: date_fmt, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
   {%- endfor -%}
 </div>
 {%- endif -%}

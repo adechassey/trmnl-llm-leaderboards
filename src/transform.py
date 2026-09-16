@@ -51,8 +51,7 @@ USER_AGENT = "trmnl-llm-leaderboards/1.0 (+https://github.com/adechassey/trmnl-l
 TIME_BUDGET = 4.0    # seconds of network time per run (TRMNL stops the function at 5 s)
 FETCH_TIMEOUT = 3.5  # seconds per request
 MAX_BOARDS = 3
-MAX_MODELS = 15
-DEFAULT_MODELS = 10
+MAX_MODELS = 60      # rows per board; the views hide the rows that do not fit their screen
 
 ARENA_DATA = "https://raw.githubusercontent.com/oolong-tea-2026/arena-ai-leaderboards/main/data/"
 ARENA_POINTER = ARENA_DATA + "latest.json"
@@ -157,7 +156,7 @@ def run(input):
 
     ctx = Context(
         fetcher=Fetcher(seed=_seed_sources(input), offline=bool(input.get("offline")), budget=TIME_BUDGET),
-        max_models=_clamp(_to_int(cf.get("max_models"), DEFAULT_MODELS), 1, MAX_MODELS),
+        max_models=_clamp(_to_int(cf.get("max_models"), MAX_MODELS), 1, MAX_MODELS),
         open_only=_yes(cf.get("open_weights_only"), False),
         prices=_yes(cf.get("show_prices"), True),
         aa_key=_aa_key(cf),

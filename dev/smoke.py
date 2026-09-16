@@ -23,34 +23,36 @@ ONLINE = fx.build_variables(SOURCES)
 NO_SOURCES = fx.build_variables({}, offline=True)
 
 # name -> (custom_fields, variables, expected in full, absent from full, expected row count in full or None)
+# Row counts are the rows in the markup (every row the function returned, up to 60 per board);
+# the Overflow engine hides the ones that do not fit when the screen is rendered.
 CASES = {
     "default": (
         {}, ONLINE,
         ["Arena Text", "arena.ai", "Sep 2", "claude-fable-5", "Anthropic", "1507",
          "Epoch Capabilities Index", "epoch.ai", "GPT-6 Astra", "166.6", "Elo", "ECI", "LLM Leaderboards", "Updated 14:00",
          "$ in/out", "10/50", "5/25", "GPT-6 Astra OpenAI new"],
-        ["Data unavailable", "Google DeepMind", "Claude Fable 5 Anthropic new"], 20),
+        ["Data unavailable", "Google DeepMind", "Claude Fable 5 Anthropic new"], 60),
     "no_prices": (
         {"show_prices": "no"}, ONLINE,
-        ["Arena Text", "1507", "GPT-6 Astra OpenAI new"], ["$ in/out", "10/50"], 20),
+        ["Arena Text", "1507", "GPT-6 Astra OpenAI new"], ["$ in/out", "10/50"], 60),
     "prices_source_down": (
         {}, {**ONLINE, "sources": {k: v for k, v in SOURCES.items() if "openrouter" not in k}},
-        ["Arena Text", "1507", "Epoch Capabilities Index", "GPT-6 Astra OpenAI new"], ["$ in/out", "10/50", "claude-fable-5 Anthropic new"], 20),
+        ["Arena Text", "1507", "Epoch Capabilities Index", "GPT-6 Astra OpenAI new"], ["$ in/out", "10/50", "claude-fable-5 Anthropic new"], 60),
     "three_boards": (
         {"board_3": "epoch_gpqa"}, ONLINE,
-        ["Arena Text", "Epoch Capabilities Index", "GPQA Diamond", "95.8"], ["Data unavailable"], 30),
+        ["Arena Text", "Epoch Capabilities Index", "GPQA Diamond", "95.8"], ["Data unavailable"], 95),
     "livebench": (
         {"board_1": "livebench", "board_2": "livebench_agentic", "board_3": "epoch_metr"}, ONLINE,
         ["LiveBench", "livebench.ai", "Jun 25", "claude-fable-5-1-max-effort", "83.4",
          "LiveBench Agentic", "METR Time Horizon", "Claude Mythos Preview", "17.4"],
-        ["Data unavailable"], 30),
+        ["Data unavailable"], 147),
     "epoch_tables": (
         {"board_1": "epoch_hle", "board_2": "epoch_terminalbench", "board_3": "epoch_swebench", "max_models": "8"}, ONLINE,
         ["Humanity's Last Exam", "Claude Fable 5.1", "46.5", "Terminal-Bench", "GPT-5.5", "84.7", "SWE-bench Verified", "Claude Opus 4.7", "83.5"],
         ["Data unavailable"], 24),
     "aa_no_key": (
         {"board_1": "aa_intelligence", "board_2": "arena_code"}, ONLINE,
-        ["AA Intelligence", "Artificial Analysis API key", "Arena Code", "gpt-6-astra-max", "1796"], ["Data unavailable"], 10),
+        ["AA Intelligence", "Artificial Analysis API key", "Arena Code", "gpt-6-astra-max", "1796"], ["Data unavailable"], 20),
     "aa_with_key": (  # variants such as "(max)" collapse to the plain model name
         {"board_1": "aa_intelligence", "board_2": "aa_coding", "aa_api_key": "test-key", "max_models": "5"}, ONLINE,
         ["AA Intelligence", "artificialanalysis.ai", "Sample Model A Sample Lab", "78.4", "AA Coding", "Sample Model B Example AI new", "73.5", "Index",
@@ -61,33 +63,33 @@ CASES = {
         ["11 Kimi K3"], ["GPT-6 Astra", "Claude Fable 5.1", "claude-fable-5 "], None),
     "highlight": (
         {"highlight": "Claude, gpt-6"}, ONLINE,
-        ["label--filled"], [], 20),
+        ["label--filled"], [], 60),
     "max_models_3": (
         {"max_models": "3"}, ONLINE, ["claude-fable-5.1-max"], ["claude-opus-4-7-high"], 6),
     "custom_title": (
-        {"title": "Frontier models"}, ONLINE, ["Frontier models"], ["LLM Leaderboards"], 20),
+        {"title": "Frontier models"}, ONLINE, ["Frontier models"], ["LLM Leaderboards"], 60),
     "lang_fr": (
         {"language": "fr"}, ONLINE,
-        ["Classements LLM", "Modèle", "Mis à jour 14:00", "2 Sep", "nouveau"], ["Model", "Updated", " new "], 20),
+        ["Classements LLM", "Mis à jour 14:00", "2 Sep", "nouveau"], ["Updated", " new "], 60),
     "lang_auto_fr_locale": (
         {"language": "auto"}, {**ONLINE, "trmnl": {**ONLINE["trmnl"], "user": {"locale": "fr-FR"}}},
-        ["Classements LLM", "Modèle"], ["Model"], 20),
+        ["Classements LLM", "nouveau"], [" new "], 60),
     "one_board": (
-        {"board_2": "none"}, ONLINE, ["Arena Text"], ["Epoch Capabilities Index"], 10),
+        {"board_2": "none"}, ONLINE, ["Arena Text"], ["Epoch Capabilities Index"], 20),
     "no_board": (
         {"board_1": "none", "board_2": "none"}, ONLINE, ["Data unavailable", "No leaderboard selected"], ["Arena Text"], 0),
     "unknown_board": (
-        {"board_1": "made_up"}, ONLINE, ["Unknown leaderboard", "Epoch Capabilities Index"], ["Data unavailable"], 10),
+        {"board_1": "made_up"}, ONLINE, ["Unknown leaderboard", "Epoch Capabilities Index"], ["Data unavailable"], 40),
     "source_down": (  # every board keeps its title and shows its own error
         {}, NO_SOURCES, ["Arena Text", "Epoch Capabilities Index", "offline"], ["Data unavailable"], 0),
     "one_source_down": (
         {}, {**ONLINE, "sources": {k: v for k, v in SOURCES.items() if "epoch.ai" not in k}},
-        ["Arena Text", "claude-fable-5", "Epoch Capabilities Index", "offline"], ["Data unavailable"], 10),
+        ["Arena Text", "claude-fable-5", "Epoch Capabilities Index", "offline"], ["Data unavailable"], 20),
     "no_transform_output": (
         {}, {**fx.FROZEN_CLOCK, "boards": None}, ["Data unavailable", "Serverless"], ["Arena Text"], 0),
     "livebench_version_field": (
         {"board_1": "livebench", "board_2": "none", "livebench_version": "2026-06-25"}, ONLINE,
-        ["LiveBench", "Jun 25", "claude-fable-5-1-max-effort"], ["Data unavailable"], 10),
+        ["LiveBench", "Jun 25", "claude-fable-5-1-max-effort"], ["Data unavailable"], 57),
 }
 
 VIEWS = ["full", "half_horizontal", "half_vertical", "quadrant"]
@@ -108,8 +110,9 @@ def text_of(path: Path) -> str:
 
 
 def rows_of(path: Path) -> int:
+    """Leaderboard rows in the markup (the Overflow engine hides the ones that do not fit at render time)."""
     raw = path.read_text(encoding="utf-8")
-    return sum(len(re.findall(r"<tr", body)) for body in re.findall(r"<tbody>(.*?)</tbody>", raw, flags=re.S))
+    return len(re.findall(r'<div class="item">', raw))
 
 
 def main() -> int:

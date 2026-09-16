@@ -5,16 +5,17 @@
   templates and the Liquid variables used by full / half_* / quadrant:
     - error         : error message ("" when at least one board can be shown)
     - boards        : from the Serverless function src/transform.py, one entry per selected
-                      leaderboard: title, source (domain), date (ISO or ""), unit, rows
-                      (rank, model, org, score, open) and error
-    - max_models    : rows requested by the user for the full layout
+                      leaderboard: title, source (domain), date (ISO or ""), unit, has_price,
+                      rows (rank, model, org, score, price, new) and error; the function
+                      already applies the "Models per leaderboard" cap
     - hl, hl_size   : lowercase words from the "Highlight" field
     - screen_title  : title bar text
     - now_local     : render time in the user's time zone
     - lang, t_*     : on-screen language (en / fr) and the translated labels
 
   Fields read by the Serverless function rather than by the markup: board_1, board_2,
-  board_3, open_weights_only, show_prices, aa_api_key, livebench_version (see src/transform.py).
+  board_3, max_models, open_weights_only, show_prices, aa_api_key, livebench_version (see
+  src/transform.py).
 {%- endcomment -%}
 
 
@@ -31,65 +32,83 @@
 {% endtemplate %}
 
 {%- comment -%}
-  One leaderboard: title, source and date, then a rank / model / score table, plus a price
-  column ("10/50" = $10 per million input tokens, $50 per million output tokens) when the
-  function found prices, and a "new" badge on models released in the last two weeks.
-  Arguments: board, n (rows), cap (rows visible on the OG; rows cap+1..n only show on large
-  screens), compact (source line under the title, for narrow columns), price_class (extra
-  classes of the price cells, e.g. "hidden lg:table-cell" to keep them for large screens),
-  hl + hl_size (highlight words), org_class (visibility classes of the organisation after
-  the model name: "" = always, "hidden lg:inline" = large screens only, "hidden" = never),
-  table_class, date_fmt, t_model, t_no_models, t_price, t_new.
-  The enclosing layout stretches the board (layout--stretch or layout--stretch-x).
+  One leaderboard: a header line (title; unit, price legend, source and date), then one item
+  per row (the simple variant: the framework's meta bar and index are too narrow for two-digit
+  ranks): rank, model, score and price ("10/50" = $10 per million input tokens, $50 per
+  million output tokens) when the function found prices, and a "new" badge on models released
+  in the last two weeks. Scores in % or hours carry their unit; the others (Elo, ECI, Index)
+  name it in the header. The rows sit in a framework Columns container: the Overflow engine
+  shows as many as fit the board's height and splits them over up to `cols` columns
+  (`cols_lg` on large screens, `cols_lg_portrait` on large screens in portrait). Text steps
+  up one size on large screens (lg:).
+  Arguments: board, cols, cols_lg, cols_lg_portrait, board_class (extra classes of the board:
+  its height when the layout is a column, see below), compact (source line under the title,
+  for narrow boards), short_header (source and date only, for mashup slots), price_lg_only
+  (price column and legend only on large screens), org_class (visibility classes of the
+  organisation after the model name, e.g. "hidden lg:inline lg:portrait:hidden" = large
+  screens in landscape only, "hidden" = never), hl + hl_size (highlight words), date_fmt,
+  t_no_models, t_price, t_new.
+  The enclosing layout stretches the board (layout--stretch), which gives the Overflow engine
+  its height budget. In a column layout (stacked boards, portrait) a board also needs an
+  explicit height (h--full, or a share such as h--[48cqh] of the layout's height) so that
+  flexbox may shrink it below the height of its rows.
 {%- endcomment -%}
 {% template board %}
-<div class="flex flex--col">
+{%- assign suffix = "" -%}
+{%- assign meta = "" -%}
+{%- if board.unit == "%" or board.unit == "h" -%}{%- assign suffix = board.unit -%}{%- else -%}{%- assign meta = board.unit -%}{%- endif -%}
+{%- assign source_line = board.source -%}
+{%- if board.date != blank -%}{%- assign date_text = board.date | date: date_fmt -%}{%- assign source_line = source_line | append: " · " | append: date_text -%}{%- endif -%}
+{%- assign priced_line = source_line -%}
+{%- if short_header != true -%}
+  {%- if board.has_price -%}{%- assign priced_line = t_price | append: " · " | append: source_line -%}{%- endif -%}
+  {%- if meta != "" -%}{%- assign source_line = meta | append: " · " | append: source_line -%}{%- assign priced_line = meta | append: " · " | append: priced_line -%}{%- endif -%}
+  {%- if price_lg_only == false -%}{%- assign source_line = priced_line -%}{%- endif -%}
+{%- endif -%}
+<div class="flex flex--col gap--small {{ board_class }}">
   {%- if compact -%}
-  <div class="flex flex--col">
-    <span class="title title--small">{{ board.title }}</span>
-    <span class="label label--small">{{ board.source }}{% if board.date != blank %} · {{ board.date | date: date_fmt }}{% endif %}</span>
+  <div class="flex flex--col flex--left w--full">
+    <span class="title title--small lg:title--base">{{ board.title }}</span>
+    <span class="label label--small lg:label--base{% if source_line != priced_line %} lg:hidden{% endif %}">{{ source_line }}</span>
+    {%- if source_line != priced_line -%}<span class="label label--base hidden lg:inline">{{ priced_line }}</span>{%- endif -%}
   </div>
   {%- else -%}
-  <div class="flex flex--row flex--between flex--bottom gap--small">
-    <span class="title title--small">{{ board.title }}</span>
-    <span class="label label--small">{{ board.source }}{% if board.date != blank %} · {{ board.date | date: date_fmt }}{% endif %}</span>
+  <div class="flex flex--row flex--between flex--bottom gap--small w--full">
+    <span class="title title--small lg:title--base{% if short_header %} lg:portrait:title--small{% endif %}">{{ board.title }}</span>
+    <span class="label label--small lg:label--base text--right{% if source_line != priced_line %} lg:hidden{% endif %}">{{ source_line }}</span>
+    {%- if source_line != priced_line -%}<span class="label label--base text--right hidden lg:inline">{{ priced_line }}</span>{%- endif -%}
   </div>
   {%- endif -%}
   {%- if board.error != blank -%}
-  <span class="label label--small">{{ board.error }}</span>
+  <span class="label label--small lg:label--base w--full">{{ board.error }}</span>
   {%- elsif board.rows.size == 0 -%}
-  <span class="label label--small">{{ t_no_models }}</span>
+  <span class="label label--small lg:label--base w--full">{{ t_no_models }}</span>
   {%- else -%}
-  <table class="table {{ table_class }}" data-table-limit="true">
-    <thead>
-      <tr>
-        <th class="w--8"><span class="title title--small">#</span></th>
-        <th><span class="title title--small">{{ t_model }}</span></th>
-        <th class="w--16 text--right"><span class="title title--small">{{ board.unit }}</span></th>
-        {%- if board.has_price -%}<th class="w--20 text--right {{ price_class }}"><span class="title title--small">{{ t_price }}</span></th>{%- endif -%}
-      </tr>
-    </thead>
-    <tbody>
-      {%- for r in board.rows limit: n -%}
+  <div class="columns" data-overflow-max-cols="{{ cols }}" data-overflow-max-cols-lg="{{ cols_lg }}" data-overflow-max-cols-lg-portrait="{{ cols_lg_portrait }}">
+    <div class="column">
+      {%- for r in board.rows -%}
         {%- assign hit = false -%}
         {%- if hl_size > 0 -%}
           {%- assign m = r.model | downcase -%}
           {%- for h in hl -%}{%- if h != "" and m contains h -%}{%- assign hit = true -%}{%- endif -%}{%- endfor -%}
         {%- endif -%}
-        {%- if forloop.index > cap -%}{%- assign row_class = "hidden lg:table-row" -%}{%- else -%}{%- assign row_class = "" -%}{%- endif -%}
-        <tr class="{{ row_class }}">
-          <td class="w--8"><span class="label label--small">{{ r.rank }}</span></td>
-          <td>
-            <span class="label label--small{% if hit %} label--filled{% endif %}">{{ r.model }}</span>
-            {%- if r.org != blank %} <span class="label label--small label--gray {{ org_class }}">{{ r.org }}</span>{%- endif -%}
-            {%- if r.new %} <span class="label label--small label--underline">{{ t_new }}</span>{%- endif -%}
-          </td>
-          <td class="w--16 text--right"><span class="value value--xxsmall value--tnums">{{ r.score }}</span></td>
-          {%- if board.has_price -%}<td class="w--20 text--right {{ price_class }}"><span class="label label--small">{{ r.price }}</span></td>{%- endif -%}
-        </tr>
+      <div class="item">
+        <div class="content w--full">
+          <div class="flex flex--center-y gap--small w--full">
+            <div class="w--5 lg:w--7 text--right shrink-0"><span class="label label--small lg:label--base text--bold">{{ r.rank }}</span></div>
+            <div class="flex flex--center-y gap--xsmall grow">
+              <span class="label label--small lg:label--base{% if hit %} label--filled{% endif %}">{{ r.model }}</span>
+              {%- if r.org != blank -%}<span class="label label--small lg:label--base label--gray {{ org_class }}">{{ r.org }}</span>{%- endif -%}
+              {%- if r.new -%}<span class="label label--small lg:label--base label--underline">{{ t_new }}</span>{%- endif -%}
+            </div>
+            <span class="value value--xxsmall lg:value--xsmall value--tnums shrink-0">{{ r.score }}{{ suffix }}</span>
+            {%- if board.has_price -%}<div class="w--16 lg:w--20 text--right shrink-0{% if price_lg_only %} hidden lg:block{% endif %}"><span class="label label--small lg:label--base">{{ r.price }}</span></div>{%- endif -%}
+          </div>
+        </div>
+      </div>
       {%- endfor -%}
-    </tbody>
-  </table>
+    </div>
+  </div>
   {%- endif -%}
 </div>
 {% endtemplate %}
@@ -102,10 +121,6 @@
 {%- assign now_ts = now_ts | plus: 0 -%}
 {%- assign utc_offset = trmnl.user.utc_offset | default: 0 | plus: 0 -%}
 {%- assign now_local = now_ts | plus: utc_offset | date: "%H:%M" -%}
-
-{%- assign max_models = cf.max_models | default: 10 | plus: 0 -%}
-{%- if max_models < 1 -%}{%- assign max_models = 10 -%}{%- endif -%}
-{%- if max_models > 15 -%}{%- assign max_models = 15 -%}{%- endif -%}
 
 {%- comment -%} Highlight words: lowercase, trimmed around the commas {%- endcomment -%}
 {%- assign hl_raw = cf.highlight | default: "" | downcase | strip | replace: " ,", "," | replace: ", ", "," -%}
@@ -128,7 +143,6 @@
 {%- endif -%}
 {%- if lang == "fr" -%}
   {%- assign t_title = "Classements LLM" -%}
-  {%- assign t_model = "Modèle" -%}
   {%- assign t_no_models = "Aucun modèle" -%}
   {%- assign t_updated = "Mis à jour" -%}
   {%- assign t_unavailable = "Données indisponibles" -%}
@@ -139,7 +153,6 @@
 {%- else -%}
   {%- assign lang = "en" -%}
   {%- assign t_title = "LLM Leaderboards" -%}
-  {%- assign t_model = "Model" -%}
   {%- assign t_no_models = "No models" -%}
   {%- assign t_updated = "Updated" -%}
   {%- assign t_unavailable = "Data unavailable" -%}

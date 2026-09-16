@@ -1,17 +1,21 @@
 {%- comment -%}
-  Full screen (800x480): the selected leaderboards side by side (up to 3), max_models rows
-  each. On the OG the table fits 12 rows (11 with three boards, whose narrower columns put
-  the source line under the title); rows beyond that only show on large screens (TRMNL X).
-  With two boards the organisation follows the model name, on the OG only when the price
-  column is off (both would wrap long names). In portrait orientation the boards are stacked.
+  Full screen (800x480 on the OG, 1040x780 on the TRMNL X, 780x1040 in portrait): the selected
+  leaderboards side by side (up to 3), stacked in portrait. Each board lists as many rows as fit
+  its height (Overflow engine) and spreads them over two columns when it has the width: a
+  single board on every screen, every board in portrait. With one or two boards the
+  organisation follows the model name on large screens in landscape (the only case with room
+  for it). With three boards the price column and legend only fit on large screens.
 {%- endcomment -%}
 {%- if boards.size > 2 -%}
-  {%- comment -%} three columns: the price column only fits on large screens {%- endcomment -%}
-  {%- assign compact = true -%}{%- assign org_class = "hidden" -%}{%- assign cap = 11 -%}{%- assign price_class = "hidden lg:table-cell" -%}
+  {%- assign cols = 1 -%}{%- assign cols_lg = 1 -%}{%- assign cols_lg_portrait = 2 -%}
+  {%- assign board_class = "portrait:h--[32cqh]" -%}{%- assign compact = true -%}{%- assign price_lg_only = true -%}{%- assign org_class = "hidden" -%}
 {%- else -%}
-  {%- assign compact = false -%}{%- assign cap = 12 -%}{%- assign price_class = "" -%}
-  {%- assign prices_on = cf.show_prices | default: "yes" | downcase -%}
-  {%- if prices_on == "no" -%}{%- assign org_class = "" -%}{%- else -%}{%- assign org_class = "hidden lg:inline" -%}{%- endif -%}
+  {%- if boards.size > 1 -%}
+    {%- assign cols = 1 -%}{%- assign cols_lg = 1 -%}{%- assign cols_lg_portrait = 2 -%}{%- assign board_class = "portrait:h--[48cqh]" -%}
+  {%- else -%}
+    {%- assign cols = 2 -%}{%- assign cols_lg = 2 -%}{%- assign cols_lg_portrait = 2 -%}{%- assign board_class = "portrait:h--full" -%}
+  {%- endif -%}
+  {%- assign compact = false -%}{%- assign price_lg_only = false -%}{%- assign org_class = "hidden lg:inline lg:portrait:hidden" -%}
 {%- endif -%}
 {%- if error != "" -%}
 <div class="layout layout--col layout--center">
@@ -19,9 +23,9 @@
   <span class="label label--small">{{ error }}</span>
 </div>
 {%- else -%}
-<div class="layout layout--row layout--stretch gap--large portrait:flex--col">
+<div class="layout layout--row layout--stretch portrait:layout--col gap--large">
   {%- for b in boards -%}
-    {% render 'board', board: b, n: max_models, cap: cap, compact: compact, price_class: price_class, hl: hl, hl_size: hl_size, org_class: org_class, table_class: "table--small", date_fmt: date_fmt, t_model: t_model, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
+    {% render 'board', board: b, cols: cols, cols_lg: cols_lg, cols_lg_portrait: cols_lg_portrait, board_class: board_class, compact: compact, short_header: false, price_lg_only: price_lg_only, org_class: org_class, hl: hl, hl_size: hl_size, date_fmt: date_fmt, t_no_models: t_no_models, t_price: t_price, t_new: t_new %}
   {%- endfor -%}
 </div>
 {%- endif -%}
