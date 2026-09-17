@@ -97,8 +97,8 @@
           <div class="flex flex--center-y gap--small w--full">
             <div class="w--5 lg:w--7 text--right shrink-0"><span class="label label--small lg:label--base text--bold">{{ r.rank }}</span></div>
             <div class="flex flex--center-y gap--xsmall grow">
-              <span class="label label--small lg:label--base{% if hit %} label--filled{% endif %}">{{ r.model }}</span>
-              {%- if r.org != blank -%}<span class="label label--small lg:label--base label--gray {{ org_class }}">{{ r.org }}</span>{%- endif -%}
+              <span class="label label--small lg:label--xlarge{% if hit %} label--filled{% endif %}">{{ r.model }}</span>
+              {%- if r.org != blank -%}<span class="label label--small lg:label--large label--gray {{ org_class }}">{{ r.org }}</span>{%- endif -%}
               {%- if r.new -%}<span class="label label--small lg:label--base label--underline">{{ t_new }}</span>{%- endif -%}
             </div>
             <span class="value value--xxsmall lg:value--xsmall value--tnums shrink-0">{{ r.score }}{{ suffix }}</span>
