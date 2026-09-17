@@ -101,7 +101,7 @@
               {%- if r.org != blank -%}<span class="label label--small lg:label--large label--gray {{ org_class }}">{{ r.org }}</span>{%- endif -%}
               {%- if r.new -%}<span class="label label--small lg:label--base label--underline">{{ t_new }}</span>{%- endif -%}
             </div>
-            <span class="value value--xxsmall lg:value--xsmall value--tnums shrink-0">{{ r.score }}{{ suffix }}</span>
+            <span class="value value--xxsmall lg:value--small value--tnums shrink-0">{{ r.score }}{{ suffix }}</span>
             {%- if board.has_price -%}<div class="w--16 lg:w--20 text--right shrink-0{% if price_lg_only %} hidden lg:block{% endif %}"><span class="label label--small lg:label--base">{{ r.price }}</span></div>{%- endif -%}
           </div>
         </div>
