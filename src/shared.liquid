@@ -85,7 +85,7 @@
   <span class="label label--small lg:label--base w--full">{{ t_no_models }}</span>
   {%- else -%}
   <div class="columns" data-overflow-max-cols="{{ cols }}" data-overflow-max-cols-lg="{{ cols_lg }}" data-overflow-max-cols-lg-portrait="{{ cols_lg_portrait }}">
-    <div class="column">
+    <div class="column lg:gap--xsmall">
       {%- for r in board.rows -%}
         {%- assign hit = false -%}
         {%- if hl_size > 0 -%}
