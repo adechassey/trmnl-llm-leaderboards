@@ -140,6 +140,18 @@ If TRMNL does not recognise the `text/plain` JSON, the function fetches the poin
   `text--gray` also carries `1bit:text--black` (review by Mario at TRMNL, 2026-09-17); on the
   4-bit TRMNL X the label stays gray. `layout--stretch > *` already gives the children `flex: 1 1 0%`, so a
   `stretch-x` on them is redundant (Chef's review, 2026-09-11).
+- Framework typography grew overnight (noticed 2026-09-21): trmnl.com now serves TRMNL's
+  custom fonts (`NicoClean` labels, `BlockKie` titles, `TRMNL12/16/21` pixel bundles) and the
+  defaults render `label--small` at 16 px and `title--small` at 26 px, against the ~12-13 px
+  Inter of the Sep 11-17 renders (Chef screenshot, README screenshots). The CSS 3.3.1 → 3.3.2
+  delta is 28 bytes and `plugins.js` is byte-identical, so the change is consistent with the
+  custom-font rollout rather than the CSS version bump (exact server-side trigger unconfirmed; `screen--fonts-classic` / `screen--fonts-trmnl` do not change the computed
+  styles in trmnlp previews. Rows designed for the old metrics wrap and collide. Mitigation:
+  `data-clamp="1"` (framework Clamp engine, docs 3.3) on every row label and header
+  title/meta, so a label ellipsizes instead of wrapping; verified across OG / TRMNL X
+  landscape / portrait. The local overflow-engine behaviour under the new fonts is
+  nondeterministic in trmnlp previews (occasional collapsed screens) — re-check on the device
+  before drawing conclusions from a single preview.
 - `{% template %}` partials take explicit arguments with `{% render %}`; loops inside work.
 - Rows are framework `item`s in a `columns` container with `data-overflow-max-cols` (base,
   `-lg`, `-lg-portrait`): the Overflow engine (`plugins.js`) measures the items, hides those

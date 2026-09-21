@@ -68,15 +68,15 @@
 <div class="flex flex--col gap--small {{ board_class }}">
   {%- if compact -%}
   <div class="flex flex--col flex--left w--full">
-    <span class="title title--small lg:title--base">{{ board.title }}</span>
-    <span class="label label--small lg:label--base{% if source_line != priced_line %} lg:hidden{% endif %}">{{ source_line }}</span>
-    {%- if source_line != priced_line -%}<span class="label label--base hidden lg:inline">{{ priced_line }}</span>{%- endif -%}
+    <span class="title title--small lg:title--base" data-clamp="1">{{ board.title }}</span>
+    <span class="label label--small lg:label--base{% if source_line != priced_line %} lg:hidden{% endif %}" data-clamp="1">{{ source_line }}</span>
+    {%- if source_line != priced_line -%}<span class="label label--base hidden lg:inline" data-clamp="1">{{ priced_line }}</span>{%- endif -%}
   </div>
   {%- else -%}
   <div class="flex flex--row flex--between flex--bottom gap--small w--full">
-    <span class="title title--small lg:title--base{% if short_header %} lg:portrait:title--small{% endif %}">{{ board.title }}</span>
-    <span class="label label--small lg:label--base text--right{% if source_line != priced_line %} lg:hidden{% endif %}">{{ source_line }}</span>
-    {%- if source_line != priced_line -%}<span class="label label--base text--right hidden lg:inline">{{ priced_line }}</span>{%- endif -%}
+    <span class="title title--small lg:title--base{% if short_header %} lg:portrait:title--small{% endif %}" data-clamp="1">{{ board.title }}</span>
+    <span class="label label--small lg:label--base text--right{% if source_line != priced_line %} lg:hidden{% endif %}" data-clamp="1">{{ source_line }}</span>
+    {%- if source_line != priced_line -%}<span class="label label--base text--right hidden lg:inline" data-clamp="1">{{ priced_line }}</span>{%- endif -%}
   </div>
   {%- endif -%}
   {%- if board.error != blank -%}
@@ -97,11 +97,11 @@
           <div class="flex flex--center-y gap--small w--full">
             <div class="w--5 lg:w--7 text--right shrink-0"><span class="label label--small lg:label--base text--bold">{{ r.rank }}</span></div>
             <div class="flex flex--center-y gap--xsmall grow">
-              <span class="label label--small lg:label--xlarge{% if hit %} label--filled{% endif %}">{{ r.model }}</span>
-              {%- if r.org != blank -%}<span class="label label--small lg:label--large label--gray 1bit:text--black {{ org_class }}">{{ r.org }}</span>{%- endif -%}
+              <span class="label label--small lg:label--base{% if hit %} label--filled{% endif %}" data-clamp="1">{{ r.model }}</span>
+              {%- if r.org != blank -%}<span class="label label--small lg:label--base label--gray 1bit:text--black {{ org_class }}" data-clamp="1">{{ r.org }}</span>{%- endif -%}
               {%- if r.new -%}<span class="label label--small lg:label--base label--underline">{{ t_new }}</span>{%- endif -%}
             </div>
-            <span class="value value--xxsmall lg:value--small value--tnums shrink-0">{{ r.score }}{{ suffix }}</span>
+            <span class="value value--xxsmall lg:value--xsmall value--tnums shrink-0">{{ r.score }}{{ suffix }}</span>
             {%- if board.has_price -%}<div class="w--16 lg:w--20 text--right shrink-0{% if price_lg_only %} hidden lg:block{% endif %}"><span class="label label--small lg:label--base">{{ r.price }}</span></div>{%- endif -%}
           </div>
         </div>
