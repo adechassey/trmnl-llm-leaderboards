@@ -133,10 +133,12 @@ If TRMNL does not recognise the `text/plain` JSON, the function fetches the poin
   `gap--xsmall`, `flex--between`, `flex--bottom`, `flex--center-y`, `grow`,
   `shrink-0`, `w--full`, `w--5`, `lg:w--7`, `w--16`, `lg:w--20`, `h--full`, `h--[48cqh]`, `portrait:h--[32cqh]`,
   `text--right`, `hidden`, `lg:inline`, `lg:block`, `lg:hidden`, `lg:portrait:hidden`,
-  `columns`, `column`, `item`, `content`, `label--filled`, `label--gray`,
-  `label--underline`, `lg:label--base`, `lg:title--base`, `lg:portrait:title--small`,
-  `value--xxsmall`, `lg:value--xsmall`, `value--tnums`, `text--bold`. `label--xsmall` and `title--xsmall`
-  do not exist. `layout--stretch > *` already gives the children `flex: 1 1 0%`, so a
+  `columns`, `column`, `item`, `content`, `label--filled`, `label--gray`, `1bit:text--black`,
+  `label--underline`, `lg:label--xlarge`, `lg:label--large`, `lg:title--base`, `lg:portrait:title--small`,
+  `value--xxsmall`, `lg:value--small`, `value--tnums`, `text--bold`. `label--xsmall` and `title--xsmall`
+  do not exist. Small gray text is hard to read on a 1-bit palette, so every `label--gray` /
+  `text--gray` also carries `1bit:text--black` (review by Mario at TRMNL, 2026-09-17); on the
+  4-bit TRMNL X the label stays gray. `layout--stretch > *` already gives the children `flex: 1 1 0%`, so a
   `stretch-x` on them is redundant (Chef's review, 2026-09-11).
 - `{% template %}` partials take explicit arguments with `{% render %}`; loops inside work.
 - Rows are framework `item`s in a `columns` container with `data-overflow-max-cols` (base,
@@ -171,8 +173,10 @@ If TRMNL does not recognise the `text/plain` JSON, the function fetches the poin
     look cramped on the X), so the rows are simple items with the rank as a bold,
     right-aligned label (`text--bold`) in a `w--5 lg:w--7` cell. An outlined badge
     (`label--outline`) was tried and rejected: boxy, and 1 px taller than the score.
-- Sizes: OG `label--small` (12 px) rows and `value--xxsmall` scores, TRMNL X `lg:label--base`
-  (16 px), `lg:value--xsmall` (20 px), `lg:title--base` board titles; in the narrow mashup
+- Sizes: OG `label--small` (12 px) rows and `value--xxsmall` scores, TRMNL X `lg:label--xlarge`
+  model names, `lg:label--large` organisations, `lg:value--small` scores, `lg:title--base` board
+  titles, `lg:gap--xsmall` between the columns (upscaling and gap reduction applied by Mario at
+  TRMNL, 2026-09-17); in the narrow mashup
   slots in portrait `lg:portrait:title--small`. The organisation is shown only where a row
   has the width (TRMNL X, landscape, one or two boards): `hidden lg:inline lg:portrait:hidden`.
 - Device classes seen by the views (trmnl.com/api/models): TRMNL OG `screen--md screen--1bit`
